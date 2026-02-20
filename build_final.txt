@@ -1,0 +1,103 @@
+﻿
+> ui-auto@0.0.0 build
+> vite build
+
+[36mvite v7.3.1 [32mbuilding client environment for production...[36m[39m
+transforming...
+[32mΓ£ô[39m 141 modules transformed.
+node.exe : 
+[31mΓ£ù[39m Build 
+failed in 869ms
+At C:\Program Files\no
+dejs\npm.ps1:29 char:3
++   & $NODE_EXE 
+$NPM_CLI_JS $args
++   ~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~
+    + CategoryInfo    
+          : NotSpeci  
+  fied: ([31mΓ£ù[   
+ 39m Build failed     
+in 869ms:String)     
+[], RemoteExcepti    
+on
+    + FullyQualifiedE 
+   rrorId : NativeCo  
+  mmandError
+ 
+[31merror during 
+build:
+[31m[vite]: Rollup 
+failed to resolve 
+import 
+"@mui/material/utils" 
+from "C:/Users/Hp/Desk
+top/ui auto/node_modul
+es/@mui/icons-material
+/esm/utils/createSvgIc
+on.js".
+This is most likely 
+unintended because it 
+can break your 
+application at 
+runtime.
+If you do want to 
+externalize this 
+module explicitly add 
+it to
+`build.rollupOptions.e
+xternal`[31m
+    at viteLog (file:/
+//C:/Users/Hp/Desktop/
+ui%20auto/node_modules
+/vite/dist/node/chunks
+/config.js:33635:57)
+    at file:///C:/User
+s/Hp/Desktop/ui%20auto
+/node_modules/vite/dis
+t/node/chunks/config.j
+s:33669:73
+    at onwarn (file://
+/C:/Users/Hp/Desktop/u
+i%20auto/node_modules/
+@vitejs/plugin-react/d
+ist/index.js:76:7)
+    at file:///C:/User
+s/Hp/Desktop/ui%20auto
+/node_modules/vite/dis
+t/node/chunks/config.j
+s:33669:28
+    at onRollupLog (fi
+le:///C:/Users/Hp/Desk
+top/ui%20auto/node_mod
+ules/vite/dist/node/ch
+unks/config.js:33664:6
+3)
+    at onLog (file:///
+C:/Users/Hp/Desktop/ui
+%20auto/node_modules/v
+ite/dist/node/chunks/c
+onfig.js:33467:4)
+    at file:///C:/User
+s/Hp/Desktop/ui%20auto
+/node_modules/rollup/d
+ist/es/shared/node-ent
+ry.js:20958:32
+    at Object.logger 
+[as onLog] (file:///C:
+/Users/Hp/Desktop/ui%2
+0auto/node_modules/rol
+lup/dist/es/shared/nod
+e-entry.js:22945:9)
+    at ModuleLoader.ha
+ndleInvalidResolvedId 
+(file:///C:/Users/Hp/D
+esktop/ui%20auto/node_
+modules/rollup/dist/es
+/shared/node-entry.js:
+21689:26)
+    at file:///C:/User
+s/Hp/Desktop/ui%20auto
+/node_modules/rollup/d
+ist/es/shared/node-ent
+ry.js:21647:26[39m

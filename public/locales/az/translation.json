@@ -1,0 +1,68 @@
+{
+    "filters": {
+        "All": "Hamısı",
+        "Engine": "Mühərrik",
+        "Brakes": "Əyləclər",
+        "Suspension": "Asqı",
+        "Exhaust": "Egzoz",
+        "Lighting": "İşıqlandırma",
+        "Interior": "İnteryer",
+        "Exterior": "Eksteryer",
+        "Wheels": "Təkərlər",
+        "Fluids": "Mayelər",
+        "Tools": "Alətlər",
+        "Bulbs": "Lampalar",
+        "LEDs": "LED-lər",
+        "Lenses": "Linzalar",
+        "Wipers": "Siləcəklər",
+        "Scents": "Ətirlər",
+        "Extras": "Əlavələr",
+        "BMW": "BMW",
+        "Foglights": "Duman işıqları",
+        "Care": "Qulluq",
+        "Visors": "Günlüklər",
+        "Optics": "Optika"
+    },
+    "ui": {
+        "searchPlaceholder": "Məhsulları axtarın...",
+        "results": "Nəticə",
+        "latestArrivals": "Yeni Gələnlər",
+        "noProducts": "Məhsul tapılmadı.",
+        "shopNow": "İndi Al",
+        "experience": "Kəşf et",
+        "garage": "Qaraj",
+        "your": "Sizin",
+        "emptyGarage": "Qarajınız boşdur",
+        "addParts": "Gəlin hissələr əlavə edək!",
+        "startShopping": "Alış-verişə Başla",
+        "total": "Cəmi",
+        "orderWhatsApp": "WhatsApp ilə Sifariş",
+        "connecting": "Qoşulur...",
+        "sending": "Qaraja göndərilir...",
+        "preparing": "Sifarişiniz WhatsApp üçün hazırlanır",
+        "location": "Bakı, AZ",
+        "tabs": {
+            "home": "Ana Səhifə",
+            "search": "Axtarış",
+            "cart": "Səbət",
+            "profile": "Profil"
+        }
+    },
+    "admin": {
+        "login": "Sistem Girişi",
+        "enterPin": "PIN daxil edin",
+        "unlock": "Kilidi aç",
+        "locked": "Kilidlənib",
+        "invalidPin": "Yanlış PIN",
+        "systemLocked": "Sistem kilidlənib",
+        "uploadPhoto": "Şəkil yüklə",
+        "save": "Yadda saxla",
+        "editImage": "Şəkli düzəlt"
+    },
+    "shop": {
+        "addToCart": "Səbətə at",
+        "addedToCart": "Səbətdədir",
+        "featured": "Seçilmiş",
+        "newCategory": "Yeni Kateqoriya"
+    }
+}

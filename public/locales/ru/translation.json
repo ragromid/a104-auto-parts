@@ -1,0 +1,68 @@
+{
+    "filters": {
+        "All": "Все",
+        "Engine": "Двигатель",
+        "Brakes": "Тормоза",
+        "Suspension": "Подвеска",
+        "Exhaust": "Выхлоп",
+        "Lighting": "Освещение",
+        "Interior": "Интерьер",
+        "Exterior": "Экстерьер",
+        "Wheels": "Колеса",
+        "Fluids": "Жидкости",
+        "Tools": "Инструменты",
+        "Bulbs": "Лампы",
+        "LEDs": "LED",
+        "Lenses": "Линзы",
+        "Wipers": "Дворники",
+        "Scents": "Ароматизаторы",
+        "Extras": "Аксессуары",
+        "BMW": "BMW",
+        "Foglights": "Противотуманки",
+        "Care": "Уход",
+        "Visors": "Козырьки",
+        "Optics": "Оптика"
+    },
+    "ui": {
+        "searchPlaceholder": "Поиск товаров...",
+        "results": "Результаты",
+        "latestArrivals": "Новые поступления",
+        "noProducts": "Товары не найдены.",
+        "shopNow": "Купить сейчас",
+        "experience": "Откройте",
+        "garage": "Гараж",
+        "your": "Ваш",
+        "emptyGarage": "Ваш гараж пуст",
+        "addParts": "Давайте добавим детали!",
+        "startShopping": "Начать покупки",
+        "total": "Всего",
+        "orderWhatsApp": "Заказать в WhatsApp",
+        "connecting": "Подключение...",
+        "sending": "Отправка в гараж...",
+        "preparing": "Подготовка заказа для WhatsApp",
+        "location": "Баку, AZ",
+        "tabs": {
+            "home": "Главная",
+            "search": "Поиск",
+            "cart": "Корзина",
+            "profile": "Профиль"
+        }
+    },
+    "admin": {
+        "login": "Вход в систему",
+        "enterPin": "Введите PIN",
+        "unlock": "Разблокировать",
+        "locked": "Заблокировано",
+        "invalidPin": "Неверный PIN",
+        "systemLocked": "Система заблокирована",
+        "uploadPhoto": "Загрузить фото",
+        "save": "Сохранить",
+        "editImage": "Редактировать"
+    },
+    "shop": {
+        "addToCart": "В корзину",
+        "addedToCart": "В корзине",
+        "featured": "Рекомендуемые",
+        "newCategory": "Новая категория"
+    }
+}

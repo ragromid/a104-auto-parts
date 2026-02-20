@@ -1,0 +1,68 @@
+{
+    "filters": {
+        "All": "All",
+        "Engine": "Engine",
+        "Brakes": "Brakes",
+        "Suspension": "Suspension",
+        "Exhaust": "Exhaust",
+        "Lighting": "Lighting",
+        "Interior": "Interior",
+        "Exterior": "Exterior",
+        "Wheels": "Wheels",
+        "Fluids": "Fluids",
+        "Tools": "Tools",
+        "Bulbs": "Bulbs",
+        "LEDs": "LEDs",
+        "Lenses": "Lenses",
+        "Wipers": "Wipers",
+        "Scents": "Scents",
+        "Extras": "Extras",
+        "BMW": "BMW",
+        "Foglights": "Foglights",
+        "Care": "Care",
+        "Visors": "Visors",
+        "Optics": "Optics"
+    },
+    "ui": {
+        "searchPlaceholder": "Search products...",
+        "results": "Results",
+        "latestArrivals": "Latest Arrivals",
+        "noProducts": "No products found.",
+        "shopNow": "Shop Now",
+        "experience": "Experience",
+        "garage": "Garage",
+        "your": "Your",
+        "emptyGarage": "Your garage is empty",
+        "addParts": "Let's add some parts!",
+        "startShopping": "Start Shopping",
+        "total": "Total",
+        "orderWhatsApp": "Order via WhatsApp",
+        "connecting": "Connecting...",
+        "sending": "Sending to Garage...",
+        "preparing": "Preparing your order for WhatsApp",
+        "location": "Baku, AZ",
+        "tabs": {
+            "home": "Home",
+            "search": "Search",
+            "cart": "Cart",
+            "profile": "Profile"
+        }
+    },
+    "admin": {
+        "login": "System Login",
+        "enterPin": "Enter PIN",
+        "unlock": "Unlock",
+        "locked": "Locked",
+        "invalidPin": "Invalid PIN",
+        "systemLocked": "System Locked",
+        "uploadPhoto": "Upload Photo",
+        "save": "Save",
+        "editImage": "Edit Image"
+    },
+    "shop": {
+        "addToCart": "Add to Cart",
+        "addedToCart": "Added to Cart",
+        "featured": "Featured",
+        "newCategory": "New Category"
+    }
+}
