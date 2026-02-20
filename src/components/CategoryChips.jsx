@@ -260,6 +260,20 @@ const CategoryChips = ({ activeCategory, onSelectCategory, onOpenSheet }) => {
                                             />
                                         </div>
 
+                                        {/* Add Subcategory Button */}
+                                        {isAdminMode && (
+                                            <div
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    addCategory(category.id);
+                                                }}
+                                                className="ml-1 w-5 h-5 flex items-center justify-center rounded-full text-green-500 hover:text-green-700 hover:bg-green-100 dark:hover:bg-green-900/30 transition-all opacity-0 group-hover:opacity-100 sm:opacity-100"
+                                                title="Add Subcategory"
+                                            >
+                                                <AddIcon style={{ fontSize: 14 }} />
+                                            </div>
+                                        )}
+
                                         {/* Delete Category Button */}
                                         {isAdminMode && (
                                             <div
