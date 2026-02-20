@@ -17,10 +17,16 @@ export const AuthProvider = ({ children }) => {
     const useDb = import.meta.env.VITE_USE_DB === 'true';
 
     useEffect(() => {
-        if (!useDb) {
-            // Fallback for LocalStorage mode (Auto-admin if no DB)
+        // ALWAYS STRICT DEFAULT TO FALSE
+        // Only grant admin if DB is explicitly turned OFF for local dev
+        if (useDb === false && import.meta.env.MODE === 'development') {
             setIsAuthenticated(true);
-            setIsAdminMode(false); // Can trigger manually
+            setIsAdminMode(true);
+            setAuthLoading(false);
+            return;
+        } else if (!useDb) {
+            setIsAuthenticated(false);
+            setIsAdminMode(false);
             setAuthLoading(false);
             return;
         }
