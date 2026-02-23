@@ -113,6 +113,11 @@ function AppContent() {
 
   // Initialize Lenis for Smooth Scroll
   useEffect(() => {
+    // Disable Lenis entirely on touch/mobile devices to rely on native hardware-accelerated scrolling
+    const isMobileOrTouch = window.innerWidth <= 768 || ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
+
+    if (isMobileOrTouch) return;
+
     const lenis = new Lenis({
       duration: 1.2,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
@@ -293,8 +298,8 @@ function AppContent() {
                           {t('ui.shopNow')}
                         </motion.button>
                       </div>
-                      {/* Background Glows */}
-                      <div className="absolute right-0 top-0 h-full w-1/2 opacity-20 pointer-events-none">
+                      {/* Background Glows (Hidden on smaller screens to save mobile GPU) */}
+                      <div className="absolute right-0 top-0 h-full w-1/2 opacity-20 pointer-events-none hidden sm:block">
                         <div className="absolute top-1/2 left-1/2 w-96 h-96 bg-primary/40 rounded-full blur-[100px] -translate-x-1/2 -translate-y-1/2 animate-pulse-slow"></div>
                         <div className="absolute top-0 right-0 w-80 h-80 bg-secondary/30 rounded-full blur-[80px]"></div>
                       </div>

@@ -48,23 +48,26 @@ const CartDrawer = () => {
     const handleWhatsAppOrder = () => {
         setIsSending(true);
 
+        const total = getCartTotal();
+        let message = "Salam, saytınızdan ehtiyat hissələri sifariş etmək istəyirəm. Səbətimdəki məhsullar:\n\n";
+
+        cartItems.forEach(item => {
+            message += `${item.name} (SKU: ${item.sku}) x ${item.quantity} - ${item.price * item.quantity} ₼\n`;
+        });
+
+        message += `\nCəmi: ${total} ₼`;
+
+        const encodedMessage = encodeURIComponent(message);
+
+        // iOS Safari blocks window.open inside setTimeouts. We must navigate synchronously or directly modify location.
+        window.location.href = `https://api.whatsapp.com/send?phone=994507007090&text=${encodedMessage}`;
+
+        // Cleanup UI state in background
         setTimeout(() => {
-            const total = getCartTotal();
-            let message = "Salam, saytınızdan ehtiyat hissələri sifariş etmək istəyirəm. Səbətimdəki məhsullar:\n\n";
-
-            cartItems.forEach(item => {
-                message += `${item.name} (SKU: ${item.sku}) x ${item.quantity} - ${item.price * item.quantity} ₼\n`;
-            });
-
-            message += `\nCəmi: ${total} ₼`;
-
-            const encodedMessage = encodeURIComponent(message);
-            window.open(`https://wa.me/994507007090?text=${encodedMessage}`, '_blank');
-
             setIsSending(false);
             toggleCart();
             setShowSuccess(true);
-        }, 1500);
+        }, 500);
     };
 
     const variants = {
