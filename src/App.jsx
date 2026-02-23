@@ -111,6 +111,23 @@ function AppContent() {
   const [activeCategory, setActiveCategory] = useState('All');
   const [searchTerm, setSearchTerm] = useState('');
 
+  // Check URL for direct product links on load
+  useEffect(() => {
+    if (!loading && products.length > 0) {
+      const params = new URLSearchParams(window.location.search);
+      const productId = params.get('product');
+      if (productId) {
+        const found = products.find(p => p.id === productId);
+        if (found) {
+          setSelectedProductId(productId);
+
+          // Optional: clear the URL so refreshing doesn't keep opening it
+          // window.history.replaceState({}, '', window.location.pathname);
+        }
+      }
+    }
+  }, [loading, products]);
+
   // Initialize Lenis for Smooth Scroll
   useEffect(() => {
     // Disable Lenis entirely on touch/mobile devices to rely on native hardware-accelerated scrolling

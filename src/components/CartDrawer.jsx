@@ -51,11 +51,16 @@ const CartDrawer = () => {
         const total = getCartTotal();
         let message = "Salam, saytınızdan ehtiyat hissələri sifariş etmək istəyirəm. Səbətimdəki məhsullar:\n\n";
 
-        cartItems.forEach(item => {
-            message += `${item.name} (SKU: ${item.sku}) x ${item.quantity} - ${item.price * item.quantity} ₼\n`;
+        const baseUrl = window.location.origin;
+
+        cartItems.forEach((item, index) => {
+            const productUrl = `${baseUrl}/?product=${item.id}`; // Simple URL scheme assuming we can deep link or just link to the site for now
+            message += `${index + 1}. ${item.name} (SKU: ${item.sku})\n`;
+            message += `   Sayt linki: ${productUrl}\n`;
+            message += `   Say: ${item.quantity} ədəd, Qiymət: ${item.price * item.quantity} ₼\n\n`;
         });
 
-        message += `\nCəmi: ${total} ₼`;
+        message += `Cəmi: ${total} ₼`;
 
         const encodedMessage = encodeURIComponent(message);
 
