@@ -176,7 +176,7 @@ const CategoryChips = ({ activeCategory, onSelectCategory, onOpenSheet }) => {
                 className="w-full py-3 px-4 sm:px-6 lg:px-8 overflow-x-auto no-scrollbar"
             >
                 <div
-                    className="flex space-x-3 w-max items-center"
+                    className="flex flex-nowrap space-x-3 w-max items-center"
                 >
                     <LayoutGroup id="categories">
 
