@@ -198,8 +198,15 @@ export const ContentProvider = ({ children }) => {
         if (!newName || newName.length > 50) return;
 
         saveSnapshot();
+
+        // 1. Optimistic UI Updates
+        // Update Products
         setProducts(prev => prev.map(p => p.category === id ? { ...p, category: newName } : p));
 
+        // Update Categories (Cascade rename self and children's parent references) -> Note: The tree structure 
+        // handles children inherently (they sit inside the parent's children array).
+        // If they had a parentId prop on them, we'd update it, but the tree structure relies on object nesting.
+        // We just need to ensure the parent's ID changes.
         const updateRecursive = (list) => {
             return list.map(cat => {
                 if (cat.id === id) return { ...cat, id: newName, name: newName };
@@ -209,9 +216,36 @@ export const ContentProvider = ({ children }) => {
         };
         setCategories(prev => updateRecursive(prev));
 
+        // 2. Database Synchronized Cascades
         if (useDb) {
-            await supabase.from('categories').update({ name: newName }).eq('id', id);
-            await supabase.from('products').update({ category: newName }).eq('category', id);
+            try {
+                // A. Update the Category's own record (id and name)
+                const { error: selfErr } = await supabase
+                    .from('categories')
+                    .update({ id: newName, name: newName }) // Depending on DB config, this might require ON UPDATE CASCADE in SQL, but we manually push it here
+                    .eq('id', id);
+
+                if (selfErr) console.error("DB Category Rename Failed", selfErr);
+
+                // B. Update Children's parent_id (Orphan prevention)
+                const { error: childrenErr } = await supabase
+                    .from('categories')
+                    .update({ parent_id: newName })
+                    .eq('parent_id', id);
+
+                if (childrenErr) console.error("DB Children Cascade Failed", childrenErr);
+
+                // C. Update Products' category mapping
+                const { error: productsErr } = await supabase
+                    .from('products')
+                    .update({ category: newName })
+                    .eq('category', id);
+
+                if (productsErr) console.error("DB Products Cascade Failed", productsErr);
+
+            } catch (err) {
+                console.error("Critical Cascade Failure:", err);
+            }
         }
     };
 
