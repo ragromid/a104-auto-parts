@@ -9,11 +9,11 @@ import CategoryChips from './components/CategoryChips';
 import ProductCard from './components/ProductCard';
 import SplashScreen from './components/SplashScreen';
 import BottomNav from './components/BottomNav';
-import CategoryBottomSheet from './components/CategoryBottomSheet';
+const CategoryBottomSheet = React.lazy(() => import('./components/CategoryBottomSheet'));
+const CartDrawer = React.lazy(() => import('./components/CartDrawer'));
 import { CartProvider } from './context/CartContext';
 import { AuthProvider } from './context/AuthContext';
 import { ContentProvider } from './context/ContentContext';
-import CartDrawer from './components/CartDrawer';
 import ExpandedProductCard from './components/ExpandedProductCard';
 import AddIcon from '@mui/icons-material/Add';
 
@@ -77,9 +77,9 @@ const itemVariants = {
   }
 };
 
-import AdminToolbar from './components/admin/AdminToolbar';
-import AdminLoginModal from './components/admin/AdminLoginModal';
-import SettingsModal from './components/SettingsModal';
+const AdminToolbar = React.lazy(() => import('./components/admin/AdminToolbar'));
+const AdminLoginModal = React.lazy(() => import('./components/admin/AdminLoginModal'));
+const SettingsModal = React.lazy(() => import('./components/SettingsModal'));
 import { useAuth } from './context/AuthContext';
 import { useContent } from './context/ContentContext';
 
@@ -94,6 +94,10 @@ function AppContent() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [justCreatedId, setJustCreatedId] = useState(null);
+
+  const handleProductSelect = React.useCallback((id) => {
+    setSelectedProductId(id);
+  }, []);
 
   // Dark Mode State
   const [darkMode, setDarkMode] = useState(() => {
@@ -177,21 +181,27 @@ function AppContent() {
         <AnimatePresence mode="wait">
           {loading && <SplashScreen onComplete={() => setLoading(false)} />}
         </AnimatePresence>
-        <CartDrawer />
+        <React.Suspense fallback={null}>
+          <CartDrawer />
+        </React.Suspense>
 
-        <CategoryBottomSheet
-          isOpen={isCategorySheetOpen}
-          onClose={() => setIsCategorySheetOpen(false)}
-          activeCategory={activeCategory}
-          onSelectCategory={setActiveCategory}
-        />
+        <React.Suspense fallback={null}>
+          <CategoryBottomSheet
+            isOpen={isCategorySheetOpen}
+            onClose={() => setIsCategorySheetOpen(false)}
+            activeCategory={activeCategory}
+            onSelectCategory={setActiveCategory}
+          />
+        </React.Suspense>
 
-        <SettingsModal
-          isOpen={isSettingsOpen}
-          onClose={() => setIsSettingsOpen(false)}
-          darkMode={darkMode}
-          toggleDarkMode={toggleDarkMode}
-        />
+        <React.Suspense fallback={null}>
+          <SettingsModal
+            isOpen={isSettingsOpen}
+            onClose={() => setIsSettingsOpen(false)}
+            darkMode={darkMode}
+            toggleDarkMode={toggleDarkMode}
+          />
+        </React.Suspense>
 
         <AnimatePresence>
           {selectedProductId && (
@@ -355,7 +365,7 @@ function AppContent() {
                         >
                           <ProductCard
                             product={product}
-                            onSelect={() => setSelectedProductId(product.id)}
+                            onSelect={handleProductSelect}
                           />
                         </motion.div>
                       ))}
@@ -374,7 +384,9 @@ function AppContent() {
               onTabChange={setActiveMobileTab}
               onOpenSettings={() => setIsSettingsOpen(true)}
             />
-            <AdminToolbar />
+            <React.Suspense fallback={null}>
+              <AdminToolbar />
+            </React.Suspense>
           </div>
         )}
       </CartProvider>
@@ -396,7 +408,9 @@ function MainLayout() {
     return (
       <div className="min-h-screen w-full bg-gray-100 dark:bg-gray-900">
         {/* Force open, empty onClose to prevent closing */}
-        <AdminLoginModal isOpen={true} onClose={() => { }} />
+        <React.Suspense fallback={null}>
+          <AdminLoginModal isOpen={true} onClose={() => { }} />
+        </React.Suspense>
       </div>
     );
   }

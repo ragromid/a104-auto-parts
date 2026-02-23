@@ -27,7 +27,7 @@ const ProductCard = memo(({ product, onSelect }) => {
         <motion.div
             layoutId={`card-${product.id}`}
             className="group relative h-full bg-white dark:bg-zinc-900 rounded-2xl md:rounded-3xl overflow-hidden cursor-pointer shadow-sm md:hover:shadow-2xl dark:shadow-none dark:hover:bg-zinc-800 ring-1 ring-gray-100 dark:ring-white/5 flex flex-col"
-            onClick={onSelect}
+            onClick={() => onSelect(product.id)}
             whileHover={{ y: -8 }}
             transition={{ duration: 0.3, ease: "easeOut" }}
         >
