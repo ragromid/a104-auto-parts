@@ -225,7 +225,12 @@ export const ContentProvider = ({ children }) => {
                     .update({ id: newName, name: newName }) // Depending on DB config, this might require ON UPDATE CASCADE in SQL, but we manually push it here
                     .eq('id', id);
 
-                if (selfErr) console.error("DB Category Rename Failed", selfErr);
+                if (selfErr) {
+                    console.error("DB Category Rename Failed", selfErr);
+                    alert("Rename failed. Your database might be out of sync, please refresh the page.\n\n" + selfErr.message);
+                    undo(); // Roll back the UI rename
+                    return; // Stop the cascade
+                }
 
                 // B. Update Children's parent_id (Orphan prevention)
                 const { error: childrenErr } = await supabase
@@ -250,7 +255,8 @@ export const ContentProvider = ({ children }) => {
     };
 
     const addCategory = async (parentId, newCategoryName) => {
-        console.log("ADD CATEGORY TRIGGERED", { parentId, newCategoryName });
+        const safeParentId = (!parentId || parentId === 'All' || parentId === '') ? null : parentId;
+        console.log("ADD CATEGORY TRIGGERED", { originalParentId: parentId, safeParentId, newCategoryName });
         if (newCategoryName && newCategoryName.length > 50) return;
 
         saveSnapshot();
@@ -286,7 +292,7 @@ export const ContentProvider = ({ children }) => {
             console.log("Sending to DB...");
             const { error } = await supabase
                 .from('categories')
-                .insert([{ id, name, parent_id: parentId === 'All' ? null : parentId }]);
+                .insert([{ id, name, parent_id: safeParentId }]);
             if (error) {
                 console.error("DB Add Category Failed", error);
                 setDbError("Add Category Failed: " + error.message);
