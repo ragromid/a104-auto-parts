@@ -188,6 +188,23 @@ function AppContent() {
     });
   }, [products, activeCategory, searchTerm]);
 
+  // Resolve Category Name from ID
+  const activeCategoryName = useMemo(() => {
+    if (activeCategory === 'All') return t('ui.latestArrivals');
+
+    const findName = (list) => {
+      for (const cat of list) {
+        if (cat.id === activeCategory) return t(`filters.${cat.name}`, cat.name);
+        if (cat.children) {
+          const found = findName(cat.children);
+          if (found) return found;
+        }
+      }
+      return activeCategory; // fallback
+    };
+    return findName(categories);
+  }, [activeCategory, categories, t]);
+
   // Mobile Search View Logic
   const showMobileSearch = activeMobileTab === 'search';
 
@@ -339,7 +356,7 @@ function AppContent() {
                       viewport={{ once: true }}
                       className="text-xl md:text-2xl font-light tracking-tight"
                     >
-                      {activeCategory === 'All' ? t('ui.latestArrivals') : activeCategory}
+                      {activeCategoryName}
                     </motion.h2>
 
                     {isAdminMode && (
