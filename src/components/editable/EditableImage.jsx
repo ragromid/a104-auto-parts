@@ -3,6 +3,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useTranslation } from 'react-i18next';
 import EditIcon from '@mui/icons-material/Edit';
 import { supabase } from '../../lib/supabase'; // Import our configured client
+import { deleteImageFromStorage } from '../../lib/storage';
 
 const EditableImage = ({ src, onSave, alt, className = '', containerClassName = '' }) => {
     const { isAdminMode } = useAuth();
@@ -56,6 +57,11 @@ const EditableImage = ({ src, onSave, alt, className = '', containerClassName = 
 
             // Pass the minimal URL string back to be saved in the database
             onSave(publicUrl);
+
+            // Cleanup the OLD image from storage if it exists (since we just replaced it)
+            if (src) {
+                await deleteImageFromStorage(src);
+            }
         } catch (error) {
             console.error("Error in image upload flow:", error);
         } finally {

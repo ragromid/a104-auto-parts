@@ -1,5 +1,6 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
+import { deleteImageFromStorage } from '../lib/storage';
 
 const initialCategories = [];
 
@@ -183,9 +184,19 @@ export const ContentProvider = ({ children }) => {
 
     const deleteProduct = async (id) => {
         saveSnapshot();
+
+        // Find product to get its image URL for cleanup
+        const productToDelete = products.find(p => p.id === id);
+        const imageUrl = productToDelete?.image;
+
         setProducts(prev => prev.filter(p => p.id !== id));
 
         if (useDb) {
+            // Cleanup associated image from Storage if it exists
+            if (imageUrl) {
+                await deleteImageFromStorage(imageUrl);
+            }
+
             const { error } = await supabase
                 .from('products')
                 .delete()
