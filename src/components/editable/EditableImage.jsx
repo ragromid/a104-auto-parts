@@ -42,8 +42,8 @@ const EditableImage = ({ src, onSave, alt, className = '', containerClassName = 
                 .upload(filePath, file);
 
             if (uploadError) {
-                console.error("Upload error:", uploadError);
-                alert("Failed to upload image. Make sure your 'product-images' bucket is created and public.");
+                console.error("Supabase Storage upload error:", uploadError);
+                alert(`Failed to upload image: ${uploadError.message || 'Unknown error'}. Check your console for details.`);
                 throw uploadError;
             }
 
