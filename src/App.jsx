@@ -14,8 +14,8 @@ const CartDrawer = React.lazy(() => import('./components/CartDrawer'));
 import { CartProvider } from './context/CartContext';
 import { AuthProvider } from './context/AuthContext';
 import { ContentProvider } from './context/ContentContext';
-import ExpandedProductCard from './components/ExpandedProductCard';
 import AddIcon from '@mui/icons-material/Add';
+import logoImg from './assets/logo.png';
 
 
 // ... (top of file)
@@ -323,24 +323,11 @@ function AppContent() {
                           transition={{ delay: 0.4, duration: 0.8 }}
                           className="relative w-32 h-32 sm:w-48 sm:h-48 mb-6 sm:mb-8"
                         >
-                          <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full filter drop-shadow-[0_15px_30px_rgba(255,87,34,0.4)]">
-                            {/* Left Segment (Red-Orange) */}
-                            <motion.path
-                              initial={{ x: -10, opacity: 0 }}
-                              animate={{ x: 0, opacity: 1 }}
-                              transition={{ delay: 0.5, duration: 0.8 }}
-                              d="M22 12C15 15 12 25 12 50C12 75 15 85 22 88L78 88L52 64L68 64L42 38L58 38L32 12H22Z"
-                              fill="#FF3D00"
-                            />
-                            {/* Right Segment (Orange) */}
-                            <motion.path
-                              initial={{ x: 10, opacity: 0 }}
-                              animate={{ x: 0, opacity: 1 }}
-                              transition={{ delay: 0.6, duration: 0.8 }}
-                              d="M32 12L88 50L78 88L52 64L68 64L42 38L58 38L32 12Z"
-                              fill="#FF9100"
-                            />
-                          </svg>
+                          <img
+                            src={logoImg}
+                            alt="KNK Avto Logo"
+                            className="w-full h-full object-contain filter drop-shadow-[0_15px_30px_rgba(255,87,34,0.4)]"
+                          />
                         </motion.div>
 
                         <motion.h2

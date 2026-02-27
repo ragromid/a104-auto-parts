@@ -10,6 +10,7 @@ import { useAuth } from '../context/AuthContext';
 import { useContent } from '../context/ContentContext';
 import { motion, AnimatePresence, useScroll, useTransform, useMotionTemplate } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
+import logoImg from '../assets/logo.png';
 import LanguageIcon from '@mui/icons-material/Language';
 
 const Header = ({ darkMode, toggleDarkMode, searchTerm, onSearchChange, onOpenSettings }) => {
@@ -45,16 +46,11 @@ const Header = ({ darkMode, toggleDarkMode, searchTerm, onSearchChange, onOpenSe
                         onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
                     >
                         <div className="w-8 h-8 flex-shrink-0">
-                            <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
-                                <path d="M22 12C15 15 12 25 12 50C12 75 15 85 22 88L78 88L52 64L68 64L42 38L58 38L32 12H22Z" fill="#Header-Red" />
-                                <path d="M32 12L88 50L78 88L52 64L68 64L42 38L58 38L32 12Z" fill="#Header-Orange" />
-                                <defs>
-                                    <style>{`
-                                        #Header-Red { fill: #FF3D00; }
-                                        #Header-Orange { fill: #FF9100; }
-                                    `}</style>
-                                </defs>
-                            </svg>
+                            <img
+                                src={logoImg}
+                                alt="KNK Avto"
+                                className="w-full h-full object-contain"
+                            />
                         </div>
                         <div className="flex items-baseline">
                             <span className="text-2xl font-bold tracking-tighter text-gray-900 dark:text-white">KNK</span>
