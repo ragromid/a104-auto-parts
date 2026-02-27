@@ -211,9 +211,9 @@ function AppContent() {
   return (
     <>
       <Helmet>
-        <title>{t('ui.siteTitle', 'a104.az - Premium Auto Parts')}</title>
+        <title>{t('ui.siteTitle', 'a104.az - KNK AVTO')}</title>
         <meta name="description" content={t('ui.siteDescription', 'Find the best premium auto parts and accessories directly at a104.az.')} />
-        <meta property="og:title" content="a104.az - Premium Auto Parts" />
+        <meta property="og:title" content="a104.az - KNK AVTO" />
         <meta property="og:type" content="website" />
       </Helmet>
       <CartProvider>

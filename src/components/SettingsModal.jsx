@@ -108,7 +108,7 @@ const SettingsModal = ({ isOpen, onClose, darkMode, toggleDarkMode }) => {
                         </div>
 
                         <div className="mt-8 text-center text-xs text-gray-400">
-                            Version 1.0.4 • a104 Auto Parts
+                            Version 1.0.4 • KNK AVTO
                         </div>
 
                     </motion.div>
