@@ -46,17 +46,13 @@ const Header = ({ darkMode, toggleDarkMode, searchTerm, onSearchChange, onOpenSe
                     >
                         <div className="w-8 h-8 flex-shrink-0">
                             <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
-                                <path d="M80 85C40 90 10 70 10 50C10 30 20 15 35 10L60 35L45 35L70 60L55 60L80 85Z" fill="url(#header-grad-red)" />
-                                <path d="M35 10C60 5 90 20 90 50C90 70 85 80 80 85L55 60L70 60L45 35L60 35L35 10Z" fill="url(#header-grad-orange)" />
+                                <path d="M22 12C15 15 12 25 12 50C12 75 15 85 22 88L78 88L52 64L68 64L42 38L58 38L32 12H22Z" fill="#Header-Red" />
+                                <path d="M32 12L88 50L78 88L52 64L68 64L42 38L58 38L32 12Z" fill="#Header-Orange" />
                                 <defs>
-                                    <linearGradient id="header-grad-red" x1="10" y1="50" x2="80" y2="85" gradientUnits="userSpaceOnUse">
-                                        <stop stopColor="#FF3D00" />
-                                        <stop offset="1" stopColor="#FF5722" />
-                                    </linearGradient>
-                                    <linearGradient id="header-grad-orange" x1="35" y1="10" x2="90" y2="50" gradientUnits="userSpaceOnUse">
-                                        <stop stopColor="#FFB74D" />
-                                        <stop offset="1" stopColor="#FF9800" />
-                                    </linearGradient>
+                                    <style>{`
+                                        #Header-Red { fill: #FF3D00; }
+                                        #Header-Orange { fill: #FF9100; }
+                                    `}</style>
                                 </defs>
                             </svg>
                         </div>
