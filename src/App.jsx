@@ -323,31 +323,31 @@ function AppContent() {
                           transition={{ delay: 0.4, duration: 0.8 }}
                           className="relative w-32 h-32 sm:w-48 sm:h-48 mb-6 sm:mb-8"
                         >
-                          <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full filter drop-shadow-[0_15px_15px_rgba(255,87,34,0.25)]">
-                            {/* Left Shape - Darker Orange */}
+                          <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full filter drop-shadow-[0_15px_25px_rgba(255,87,34,0.3)]">
+                            {/* Left Red Segment */}
                             <motion.path
-                              initial={{ x: -8, opacity: 0 }}
+                              initial={{ x: -10, opacity: 0 }}
                               animate={{ x: 0, opacity: 1 }}
-                              transition={{ delay: 0.5, duration: 0.8, ease: "easeOut" }}
-                              d="M15 35C15 30 20 28 25 30L55 45L45 50L65 72C68 76 65 82 60 81L25 70C20 68 15 65 15 60V35Z"
-                              fill="url(#grad-left)"
+                              transition={{ delay: 0.5, duration: 0.8, ease: "circOut" }}
+                              d="M80 85C40 90 10 70 10 50C10 30 20 15 35 10L60 35L45 35L70 60L55 60L80 85Z"
+                              fill="url(#grad-red)"
                             />
-                            {/* Right Shape - Brighter Orange */}
+                            {/* Right Orange Segment */}
                             <motion.path
-                              initial={{ x: 8, opacity: 0 }}
+                              initial={{ x: 10, opacity: 0 }}
                               animate={{ x: 0, opacity: 1 }}
-                              transition={{ delay: 0.6, duration: 0.8, ease: "easeOut" }}
-                              d="M85 55C85 60 80 62 75 60L45 45L55 40L35 18C32 14 35 8 40 9L75 20C80 22 85 25 85 30V55Z"
-                              fill="url(#grad-right)"
+                              transition={{ delay: 0.6, duration: 0.8, ease: "circOut" }}
+                              d="M35 10C60 5 90 20 90 50C90 70 85 80 80 85L55 60L70 60L45 35L60 35L35 10Z"
+                              fill="url(#grad-orange)"
                             />
                             <defs>
-                              <linearGradient id="grad-left" x1="15" y1="35" x2="65" y2="72" gradientUnits="userSpaceOnUse">
+                              <linearGradient id="grad-red" x1="10" y1="50" x2="80" y2="85" gradientUnits="userSpaceOnUse">
                                 <stop stopColor="#FF3D00" />
                                 <stop offset="1" stopColor="#FF5722" />
                               </linearGradient>
-                              <linearGradient id="grad-right" x1="35" y1="18" x2="85" y2="55" gradientUnits="userSpaceOnUse">
-                                <stop stopColor="#FF9100" />
-                                <stop offset="1" stopColor="#FF6D00" />
+                              <linearGradient id="grad-orange" x1="35" y1="10" x2="90" y2="50" gradientUnits="userSpaceOnUse">
+                                <stop stopColor="#FFB74D" />
+                                <stop offset="1" stopColor="#FF9800" />
                               </linearGradient>
                             </defs>
                           </svg>
