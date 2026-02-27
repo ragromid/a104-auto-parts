@@ -323,29 +323,29 @@ function AppContent() {
                           transition={{ delay: 0.4, duration: 0.8 }}
                           className="relative w-32 h-32 sm:w-48 sm:h-48 mb-6 sm:mb-8"
                         >
-                          <svg viewBox="0 0 120 100" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full filter drop-shadow-[0_10px_10px_rgba(255,87,34,0.3)]">
-                            {/* Left Red-Orange Segment */}
+                          <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full filter drop-shadow-[0_15px_15px_rgba(255,87,34,0.25)]">
+                            {/* Left Shape - Darker Orange */}
                             <motion.path
-                              initial={{ x: -10, opacity: 0 }}
+                              initial={{ x: -8, opacity: 0 }}
                               animate={{ x: 0, opacity: 1 }}
-                              transition={{ delay: 0.5, duration: 0.8 }}
-                              d="M10 25C10 18 18 15 22 18L50 40L40 45L60 75C62 82 55 88 48 85L15 65C10 62 10 58 10 55V25Z"
-                              fill="url(#grad-red)"
+                              transition={{ delay: 0.5, duration: 0.8, ease: "easeOut" }}
+                              d="M15 35C15 30 20 28 25 30L55 45L45 50L65 72C68 76 65 82 60 81L25 70C20 68 15 65 15 60V35Z"
+                              fill="url(#grad-left)"
                             />
-                            {/* Right Orange Segment */}
+                            {/* Right Shape - Brighter Orange */}
                             <motion.path
-                              initial={{ x: 10, opacity: 0 }}
+                              initial={{ x: 8, opacity: 0 }}
                               animate={{ x: 0, opacity: 1 }}
-                              transition={{ delay: 0.6, duration: 0.8 }}
-                              d="M110 50L75 20C70 15 62 18 64 25L55 40L65 45L45 75C42 82 48 88 55 85L105 55C110 52 110 48 110 50Z"
-                              fill="url(#grad-orange)"
+                              transition={{ delay: 0.6, duration: 0.8, ease: "easeOut" }}
+                              d="M85 55C85 60 80 62 75 60L45 45L55 40L35 18C32 14 35 8 40 9L75 20C80 22 85 25 85 30V55Z"
+                              fill="url(#grad-right)"
                             />
                             <defs>
-                              <linearGradient id="grad-red" x1="10" y1="25" x2="60" y2="75" gradientUnits="userSpaceOnUse">
+                              <linearGradient id="grad-left" x1="15" y1="35" x2="65" y2="72" gradientUnits="userSpaceOnUse">
                                 <stop stopColor="#FF3D00" />
                                 <stop offset="1" stopColor="#FF5722" />
                               </linearGradient>
-                              <linearGradient id="grad-orange" x1="60" y1="20" x2="110" y2="55" gradientUnits="userSpaceOnUse">
+                              <linearGradient id="grad-right" x1="35" y1="18" x2="85" y2="55" gradientUnits="userSpaceOnUse">
                                 <stop stopColor="#FF9100" />
                                 <stop offset="1" stopColor="#FF6D00" />
                               </linearGradient>
@@ -357,7 +357,7 @@ function AppContent() {
                           initial={{ y: 20, opacity: 0 }}
                           animate={{ y: 0, opacity: 1 }}
                           transition={{ delay: 0.6, duration: 0.8 }}
-                          className="text-4xl sm:text-7xl font-bold tracking-tighter mb-2"
+                          className="text-4xl sm:text-8xl font-black tracking-tighter mb-2"
                         >
                           <span className="text-gray-900 dark:text-white">KNK</span>{' '}
                           <span className="text-secondary">Avto</span>
@@ -367,7 +367,7 @@ function AppContent() {
                           initial={{ y: 20, opacity: 0 }}
                           animate={{ y: 0, opacity: 1 }}
                           transition={{ delay: 0.8, duration: 0.8 }}
-                          className="text-lg sm:text-2xl text-gray-500 dark:text-gray-400 font-light mb-10 tracking-widest uppercase"
+                          className="text-lg sm:text-2xl text-gray-400 dark:text-gray-500 font-medium mb-10 tracking-widest"
                         >
                           {t('ui.brandSubtext')}
                         </motion.p>
