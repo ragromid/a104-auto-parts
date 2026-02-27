@@ -41,11 +41,29 @@ const Header = ({ darkMode, toggleDarkMode, searchTerm, onSearchChange, onOpenSe
                     <motion.div
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
-                        className="flex items-center cursor-pointer group"
+                        className="flex items-center gap-2 cursor-pointer group"
                         onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
                     >
-                        <span className="text-3xl font-light tracking-tighter text-gray-900 dark:text-white font-sans">a</span>
-                        <span className="text-3xl font-bold tracking-tighter text-secondary group-hover:text-secondary-light transition-colors duration-300">104</span>
+                        <div className="w-8 h-8 flex-shrink-0">
+                            <svg viewBox="0 0 120 100" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+                                <path d="M10 25C10 18 18 15 22 18L50 40L40 45L60 75C62 82 55 88 48 85L15 65C10 62 10 58 10 55V25Z" fill="url(#header-grad-red)" />
+                                <path d="M110 50L75 20C70 15 62 18 64 25L55 40L65 45L45 75C42 82 48 88 55 85L105 55C110 52 110 48 110 50Z" fill="url(#header-grad-orange)" />
+                                <defs>
+                                    <linearGradient id="header-grad-red" x1="10" y1="25" x2="60" y2="75" gradientUnits="userSpaceOnUse">
+                                        <stop stopColor="#FF3D00" />
+                                        <stop offset="1" stopColor="#FF5722" />
+                                    </linearGradient>
+                                    <linearGradient id="header-grad-orange" x1="60" y1="20" x2="110" y2="55" gradientUnits="userSpaceOnUse">
+                                        <stop stopColor="#FF9100" />
+                                        <stop offset="1" stopColor="#FF6D00" />
+                                    </linearGradient>
+                                </defs>
+                            </svg>
+                        </div>
+                        <div className="flex items-baseline">
+                            <span className="text-2xl font-bold tracking-tighter text-gray-900 dark:text-white">KNK</span>
+                            <span className="text-2xl font-bold tracking-tighter text-secondary ml-1 group-hover:text-secondary-light transition-colors duration-300">Avto</span>
+                        </div>
                     </motion.div>
 
                     <motion.div

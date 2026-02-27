@@ -321,14 +321,33 @@ function AppContent() {
                           initial={{ y: 20, opacity: 0 }}
                           animate={{ y: 0, opacity: 1 }}
                           transition={{ delay: 0.4, duration: 0.8 }}
-                          className="relative w-24 h-24 sm:w-32 sm:h-32 mb-8"
+                          className="relative w-32 h-32 sm:w-48 sm:h-48 mb-6 sm:mb-8"
                         >
-                          <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full drop-shadow-xl">
-                            <path d="M20 50L45 15C45 15 42 45 42 45L75 45L50 85C50 85 53 55 53 55L20 50Z" fill="url(#bolt-grad)" stroke="#FF5722" strokeWidth="2" strokeLinejoin="round" />
+                          <svg viewBox="0 0 120 100" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full filter drop-shadow-[0_10px_10px_rgba(255,87,34,0.3)]">
+                            {/* Left Red-Orange Segment */}
+                            <motion.path
+                              initial={{ x: -10, opacity: 0 }}
+                              animate={{ x: 0, opacity: 1 }}
+                              transition={{ delay: 0.5, duration: 0.8 }}
+                              d="M10 25C10 18 18 15 22 18L50 40L40 45L60 75C62 82 55 88 48 85L15 65C10 62 10 58 10 55V25Z"
+                              fill="url(#grad-red)"
+                            />
+                            {/* Right Orange Segment */}
+                            <motion.path
+                              initial={{ x: 10, opacity: 0 }}
+                              animate={{ x: 0, opacity: 1 }}
+                              transition={{ delay: 0.6, duration: 0.8 }}
+                              d="M110 50L75 20C70 15 62 18 64 25L55 40L65 45L45 75C42 82 48 88 55 85L105 55C110 52 110 48 110 50Z"
+                              fill="url(#grad-orange)"
+                            />
                             <defs>
-                              <linearGradient id="bolt-grad" x1="20" y1="50" x2="75" y2="45" gradientUnits="userSpaceOnUse">
-                                <stop stopColor="#FF5722" />
-                                <stop offset="1" stopColor="#C41C00" />
+                              <linearGradient id="grad-red" x1="10" y1="25" x2="60" y2="75" gradientUnits="userSpaceOnUse">
+                                <stop stopColor="#FF3D00" />
+                                <stop offset="1" stopColor="#FF5722" />
+                              </linearGradient>
+                              <linearGradient id="grad-orange" x1="60" y1="20" x2="110" y2="55" gradientUnits="userSpaceOnUse">
+                                <stop stopColor="#FF9100" />
+                                <stop offset="1" stopColor="#FF6D00" />
                               </linearGradient>
                             </defs>
                           </svg>
