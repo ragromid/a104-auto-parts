@@ -14,8 +14,8 @@ const CartDrawer = React.lazy(() => import('./components/CartDrawer'));
 import { CartProvider } from './context/CartContext';
 import { AuthProvider } from './context/AuthContext';
 import { ContentProvider } from './context/ContentContext';
+import ExpandedProductCard from './components/ExpandedProductCard';
 import AddIcon from '@mui/icons-material/Add';
-import logoImg from './assets/logo.png';
 
 
 // ... (top of file)
@@ -309,60 +309,33 @@ function AppContent() {
                     transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1], delay: 0.3 }}
                     className="px-4 sm:px-6 lg:px-8 py-4 sm:py-6"
                   >
-                    <div className="rounded-3xl p-8 sm:p-16 relative overflow-hidden bg-white dark:bg-zinc-900 border border-gray-100 dark:border-white/5 shadow-2xl shadow-gray-200/50 dark:shadow-none min-h-[400px] sm:min-h-[500px] flex flex-col items-center justify-center text-center">
-                      {/* Background Accents */}
-                      <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-secondary to-secondary-dark opacity-80" />
-                      <div className="absolute -right-20 -bottom-20 w-80 h-80 bg-secondary/5 rounded-full blur-[100px]" />
-                      <div className="absolute -left-20 -top-20 w-80 h-80 bg-primary/5 rounded-full blur-[100px]" />
-
-                      <div className="relative z-10 flex flex-col items-center">
-                        {/* Logo Icon Implementation */}
-                        <motion.div
-                          initial={{ y: 20, opacity: 0 }}
-                          animate={{ y: 0, opacity: 1 }}
-                          transition={{ delay: 0.4, duration: 0.8 }}
-                          className="relative w-32 h-32 sm:w-48 sm:h-48 mb-6 sm:mb-8"
-                        >
-                          <img
-                            src={logoImg}
-                            alt="KNK Avto Logo"
-                            className="w-full h-full object-contain filter drop-shadow-[0_15px_30px_rgba(255,87,34,0.4)]"
-                          />
-                        </motion.div>
-
+                    <div className="rounded-2xl sm:rounded-3xl p-6 sm:p-12 relative overflow-hidden bg-black dark:bg-white/5 text-white shadow-2xl dark:shadow-none min-h-[300px] sm:min-h-[400px] flex flex-col justify-center">
+                      <div className="relative z-10 max-w-lg">
                         <motion.h2
                           initial={{ y: 20, opacity: 0 }}
                           animate={{ y: 0, opacity: 1 }}
-                          transition={{ delay: 0.6, duration: 0.8 }}
-                          className="text-4xl sm:text-8xl font-black tracking-tighter mb-2"
+                          transition={{ delay: 0.5, duration: 0.8 }}
+                          className="text-3xl sm:text-6xl font-light mb-3 sm:mb-4 tracking-tighter"
                         >
-                          <span className="text-gray-900 dark:text-white">KNK</span>{' '}
-                          <span className="text-secondary">Avto</span>
+                          {t('ui.experience')} <span className="font-bold text-secondary">a104</span>.
                         </motion.h2>
-
-                        <motion.p
-                          initial={{ y: 20, opacity: 0 }}
-                          animate={{ y: 0, opacity: 1 }}
-                          transition={{ delay: 0.8, duration: 0.8 }}
-                          className="text-lg sm:text-2xl text-gray-400 dark:text-gray-500 font-medium mb-10 tracking-widest"
-                        >
-                          {t('ui.brandSubtext')}
-                        </motion.p>
-
                         <motion.button
                           initial={{ y: 20, opacity: 0 }}
                           animate={{ y: 0, opacity: 1 }}
-                          transition={{ delay: 1.0, duration: 0.8 }}
-                          whileHover={{ scale: 1.05 }}
-                          whileTap={{ scale: 0.95 }}
+                          transition={{ delay: 0.9, duration: 0.8 }}
                           onClick={() => {
                             const grid = document.getElementById('product-grid');
                             if (grid) grid.scrollIntoView({ behavior: 'smooth' });
                           }}
-                          className="bg-gray-900 dark:bg-white text-white dark:text-gray-900 hover:bg-secondary dark:hover:bg-secondary hover:text-white dark:hover:text-white font-semibold py-4 px-12 rounded-full transition-all duration-300 text-sm sm:text-base shadow-xl shadow-gray-200 dark:shadow-none"
+                          className="bg-white text-black hover:bg-secondary hover:text-white font-medium py-2.5 px-8 sm:py-3 sm:px-10 rounded-full transition-all duration-300 text-sm sm:text-base shadow-lg shadow-white/20 hover:shadow-secondary/20"
                         >
                           {t('ui.shopNow')}
                         </motion.button>
+                      </div>
+                      {/* Background Glows (Hidden on smaller screens to save mobile GPU) */}
+                      <div className="absolute right-0 top-0 h-full w-1/2 opacity-20 pointer-events-none hidden sm:block">
+                        <div className="absolute top-1/2 left-1/2 w-96 h-96 bg-primary/40 rounded-full blur-[100px] -translate-x-1/2 -translate-y-1/2 animate-pulse-slow"></div>
+                        <div className="absolute top-0 right-0 w-80 h-80 bg-secondary/30 rounded-full blur-[80px]"></div>
                       </div>
                     </div>
                   </motion.div>

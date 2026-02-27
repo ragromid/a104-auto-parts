@@ -10,7 +10,6 @@ import { useAuth } from '../context/AuthContext';
 import { useContent } from '../context/ContentContext';
 import { motion, AnimatePresence, useScroll, useTransform, useMotionTemplate } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
-import logoImg from '../assets/logo.png';
 import LanguageIcon from '@mui/icons-material/Language';
 
 const Header = ({ darkMode, toggleDarkMode, searchTerm, onSearchChange, onOpenSettings }) => {
@@ -42,20 +41,11 @@ const Header = ({ darkMode, toggleDarkMode, searchTerm, onSearchChange, onOpenSe
                     <motion.div
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
-                        className="flex items-center gap-2 cursor-pointer group"
+                        className="flex items-center cursor-pointer group"
                         onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
                     >
-                        <div className="w-8 h-8 flex-shrink-0">
-                            <img
-                                src={logoImg}
-                                alt="KNK Avto"
-                                className="w-full h-full object-contain"
-                            />
-                        </div>
-                        <div className="flex items-baseline">
-                            <span className="text-2xl font-bold tracking-tighter text-gray-900 dark:text-white">KNK</span>
-                            <span className="text-2xl font-bold tracking-tighter text-secondary ml-1 group-hover:text-secondary-light transition-colors duration-300">Avto</span>
-                        </div>
+                        <span className="text-3xl font-light tracking-tighter text-gray-900 dark:text-white font-sans">a</span>
+                        <span className="text-3xl font-bold tracking-tighter text-secondary group-hover:text-secondary-light transition-colors duration-300">104</span>
                     </motion.div>
 
                     <motion.div
