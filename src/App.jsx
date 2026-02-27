@@ -309,33 +309,64 @@ function AppContent() {
                     transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1], delay: 0.3 }}
                     className="px-4 sm:px-6 lg:px-8 py-4 sm:py-6"
                   >
-                    <div className="rounded-2xl sm:rounded-3xl p-6 sm:p-12 relative overflow-hidden bg-black dark:bg-white/5 text-white shadow-2xl dark:shadow-none min-h-[300px] sm:min-h-[400px] flex flex-col justify-center">
-                      <div className="relative z-10 max-w-lg">
+                    <div className="rounded-3xl p-8 sm:p-16 relative overflow-hidden bg-white dark:bg-zinc-900 border border-gray-100 dark:border-white/5 shadow-2xl shadow-gray-200/50 dark:shadow-none min-h-[400px] sm:min-h-[500px] flex flex-col items-center justify-center text-center">
+                      {/* Background Accents */}
+                      <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-secondary to-secondary-dark opacity-80" />
+                      <div className="absolute -right-20 -bottom-20 w-80 h-80 bg-secondary/5 rounded-full blur-[100px]" />
+                      <div className="absolute -left-20 -top-20 w-80 h-80 bg-primary/5 rounded-full blur-[100px]" />
+
+                      <div className="relative z-10 flex flex-col items-center">
+                        {/* Logo Icon Implementation */}
+                        <motion.div
+                          initial={{ y: 20, opacity: 0 }}
+                          animate={{ y: 0, opacity: 1 }}
+                          transition={{ delay: 0.4, duration: 0.8 }}
+                          className="relative w-24 h-24 sm:w-32 sm:h-32 mb-8"
+                        >
+                          <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full drop-shadow-xl">
+                            <path d="M20 50L45 15C45 15 42 45 42 45L75 45L50 85C50 85 53 55 53 55L20 50Z" fill="url(#bolt-grad)" stroke="#FF5722" strokeWidth="2" strokeLinejoin="round" />
+                            <defs>
+                              <linearGradient id="bolt-grad" x1="20" y1="50" x2="75" y2="45" gradientUnits="userSpaceOnUse">
+                                <stop stopColor="#FF5722" />
+                                <stop offset="1" stopColor="#C41C00" />
+                              </linearGradient>
+                            </defs>
+                          </svg>
+                        </motion.div>
+
                         <motion.h2
                           initial={{ y: 20, opacity: 0 }}
                           animate={{ y: 0, opacity: 1 }}
-                          transition={{ delay: 0.5, duration: 0.8 }}
-                          className="text-3xl sm:text-6xl font-light mb-3 sm:mb-4 tracking-tighter"
+                          transition={{ delay: 0.6, duration: 0.8 }}
+                          className="text-4xl sm:text-7xl font-bold tracking-tighter mb-2"
                         >
-                          {t('ui.experience')} <span className="font-bold text-secondary">a104</span>.
+                          <span className="text-gray-900 dark:text-white">KNK</span>{' '}
+                          <span className="text-secondary">Avto</span>
                         </motion.h2>
+
+                        <motion.p
+                          initial={{ y: 20, opacity: 0 }}
+                          animate={{ y: 0, opacity: 1 }}
+                          transition={{ delay: 0.8, duration: 0.8 }}
+                          className="text-lg sm:text-2xl text-gray-500 dark:text-gray-400 font-light mb-10 tracking-widest uppercase"
+                        >
+                          {t('ui.brandSubtext')}
+                        </motion.p>
+
                         <motion.button
                           initial={{ y: 20, opacity: 0 }}
                           animate={{ y: 0, opacity: 1 }}
-                          transition={{ delay: 0.9, duration: 0.8 }}
+                          transition={{ delay: 1.0, duration: 0.8 }}
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
                           onClick={() => {
                             const grid = document.getElementById('product-grid');
                             if (grid) grid.scrollIntoView({ behavior: 'smooth' });
                           }}
-                          className="bg-white text-black hover:bg-secondary hover:text-white font-medium py-2.5 px-8 sm:py-3 sm:px-10 rounded-full transition-all duration-300 text-sm sm:text-base shadow-lg shadow-white/20 hover:shadow-secondary/20"
+                          className="bg-gray-900 dark:bg-white text-white dark:text-gray-900 hover:bg-secondary dark:hover:bg-secondary hover:text-white dark:hover:text-white font-semibold py-4 px-12 rounded-full transition-all duration-300 text-sm sm:text-base shadow-xl shadow-gray-200 dark:shadow-none"
                         >
                           {t('ui.shopNow')}
                         </motion.button>
-                      </div>
-                      {/* Background Glows (Hidden on smaller screens to save mobile GPU) */}
-                      <div className="absolute right-0 top-0 h-full w-1/2 opacity-20 pointer-events-none hidden sm:block">
-                        <div className="absolute top-1/2 left-1/2 w-96 h-96 bg-primary/40 rounded-full blur-[100px] -translate-x-1/2 -translate-y-1/2 animate-pulse-slow"></div>
-                        <div className="absolute top-0 right-0 w-80 h-80 bg-secondary/30 rounded-full blur-[80px]"></div>
                       </div>
                     </div>
                   </motion.div>
