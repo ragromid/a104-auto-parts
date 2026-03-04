@@ -7,7 +7,6 @@ import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { useContent } from '../context/ContentContext';
 import EditableText from './editable/EditableText';
-import EditablePrice from './editable/EditablePrice';
 import EditableImage from './editable/EditableImage';
 
 const ProductCard = memo(({ product, onSelect }) => {
@@ -94,12 +93,6 @@ const ProductCard = memo(({ product, onSelect }) => {
                 </div>
 
                 <div className="mt-auto flex items-center justify-between pt-2 border-t border-gray-100 dark:border-white/5">
-                    <span className="text-base sm:text-xl font-semibold text-gray-900 dark:text-gray-50 tracking-tight">
-                        <EditablePrice
-                            value={product.price}
-                            onSave={(val) => updateProduct(product.id, 'price', val)}
-                        />
-                    </span>
 
                     <button
                         onClick={(e) => {

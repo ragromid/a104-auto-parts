@@ -63,9 +63,6 @@ export const CartProvider = ({ children }) => {
         setIsCartOpen(prev => !prev);
     };
 
-    const getCartTotal = () => {
-        return cartItems.reduce((total, item) => total + (item.price * item.quantity), 0);
-    };
 
     const getCartCount = () => {
         return cartItems.reduce((count, item) => count + item.quantity, 0);
@@ -79,7 +76,6 @@ export const CartProvider = ({ children }) => {
         removeFromCart,
         updateQuantity,
         toggleCart,
-        getCartTotal,
         getCartCount
     };
 

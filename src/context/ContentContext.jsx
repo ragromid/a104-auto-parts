@@ -134,7 +134,6 @@ export const ContentProvider = ({ children }) => {
         if (field === 'name' && value.length > 100) return;
         if (field === 'sku' && value.length > 50) return;
         if (field === 'info' && value.length > 1000) return;
-        if (field === 'price' && (isNaN(value) || value < 0)) return;
 
         saveSnapshot();
 

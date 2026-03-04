@@ -17,7 +17,6 @@ const CartDrawer = () => {
         toggleCart,
         updateQuantity,
         removeFromCart,
-        getCartTotal
     } = useCart();
 
     const { t } = useTranslation();
@@ -48,7 +47,6 @@ const CartDrawer = () => {
     const handleWhatsAppOrder = () => {
         setIsSending(true);
 
-        const total = getCartTotal();
         let message = "Salam, saytınızdan ehtiyat hissələri sifariş etmək istəyirəm. Səbətimdəki məhsullar:\n\n";
 
         const baseUrl = window.location.origin;
@@ -57,10 +55,8 @@ const CartDrawer = () => {
             const productUrl = `${baseUrl}/?product=${item.id}`; // Simple URL scheme assuming we can deep link or just link to the site for now
             message += `${index + 1}. ${item.name} (SKU: ${item.sku})\n`;
             message += `   Sayt linki: ${productUrl}\n`;
-            message += `   Say: ${item.quantity} ədəd, Qiymət: ${item.price * item.quantity} ₼\n\n`;
+            message += `   Say: ${item.quantity} ədəd\n\n`;
         });
-
-        message += `Cəmi: ${total} ₼`;
 
         const encodedMessage = encodeURIComponent(message);
 
@@ -211,7 +207,6 @@ const CartDrawer = () => {
                                                 </div>
                                                 <div className="flex items-end justify-between mt-2">
                                                     <div className="text-sm font-semibold text-gray-900 dark:text-white">
-                                                        {item.price * item.quantity} ₼
                                                     </div>
                                                     <div className="flex items-center gap-3 bg-gray-100 dark:bg-white/10 rounded-full px-3 py-1">
                                                         <motion.button
@@ -241,8 +236,6 @@ const CartDrawer = () => {
                             {cartItems.length > 0 && (
                                 <div className="p-6 border-t border-gray-100 dark:border-white/5 space-y-4 bg-white dark:bg-zinc-900 pb-safe mb-4">
                                     <div className="flex items-center justify-between text-lg font-medium text-gray-900 dark:text-white">
-                                        <span>{t('ui.total')}</span>
-                                        <span>{getCartTotal()} ₼</span>
                                     </div>
                                     <motion.button
                                         whileTap={{ scale: 0.96 }}

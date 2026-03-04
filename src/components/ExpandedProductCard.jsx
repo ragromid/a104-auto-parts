@@ -6,7 +6,6 @@ import { useAuth } from '../context/AuthContext';
 import { useContent } from '../context/ContentContext';
 import { useCart } from '../context/CartContext';
 import EditableText from './editable/EditableText';
-import EditablePrice from './editable/EditablePrice';
 import EditableImage from './editable/EditableImage';
 import { Helmet } from 'react-helmet-async';
 
@@ -214,12 +213,6 @@ const ExpandedProductCard = ({ product, onClose, layoutId }) => {
 
                     {/* Footer Actions */}
                     <div className="mt-auto pt-6 border-t border-gray-100 dark:border-white/5 flex items-center justify-between gap-4">
-                        <div className="text-2xl font-bold text-gray-900 dark:text-gray-50 flex items-center">
-                            <EditablePrice
-                                value={product.price}
-                                onSave={(val) => updateProduct(product.id, 'price', val)}
-                            />
-                        </div>
 
                         {!isAdminMode && (
                             <button
