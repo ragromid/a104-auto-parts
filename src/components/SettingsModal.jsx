@@ -7,11 +7,14 @@ import CloseIcon from '@mui/icons-material/Close';
 import DarkModeIcon from '@mui/icons-material/DarkMode';
 import LightModeIcon from '@mui/icons-material/LightMode';
 import LanguageIcon from '@mui/icons-material/Language';
+import CategoryManager from './CategoryManager';
+import CategoryIcon from '@mui/icons-material/Category';
 
 const SettingsModal = ({ isOpen, onClose, darkMode, toggleDarkMode }) => {
     const { t, i18n } = useTranslation();
-    const { } = useAuth();
+    const { isAdminMode } = useAuth();
     const navigate = useNavigate();
+    const [isCatManagerOpen, setIsCatManagerOpen] = React.useState(false);
 
     const languages = [
         { code: 'en', label: 'English', flag: '🇺🇸' },
@@ -104,6 +107,24 @@ const SettingsModal = ({ isOpen, onClose, darkMode, toggleDarkMode }) => {
                                 </div>
                             </div>
 
+                            {/* Category Manager (Admin Only) */}
+                            {isAdminMode && (
+                                <div
+                                    onClick={() => setIsCatManagerOpen(true)}
+                                    className="flex items-center justify-between p-4 rounded-2xl bg-gray-50 dark:bg-white/5 cursor-pointer hover:bg-gray-100 dark:hover:bg-white/10 transition-colors"
+                                >
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 rounded-full bg-green-500/20 text-green-500 flex items-center justify-center">
+                                            <CategoryIcon />
+                                        </div>
+                                        <div>
+                                            <p className="font-medium text-gray-900 dark:text-gray-100">Categories</p>
+                                            <p className="text-xs text-gray-500 dark:text-gray-400">Reorder and manage tree</p>
+                                        </div>
+                                    </div>
+                                    <ChevronRightIcon className="text-gray-400" />
+                                </div>
+                            )}
 
                         </div>
 
@@ -114,6 +135,11 @@ const SettingsModal = ({ isOpen, onClose, darkMode, toggleDarkMode }) => {
                     </motion.div>
                 </div>
             )}
+
+            <CategoryManager
+                isOpen={isCatManagerOpen}
+                onClose={() => setIsCatManagerOpen(false)}
+            />
         </AnimatePresence>
     );
 };

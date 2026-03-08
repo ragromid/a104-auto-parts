@@ -395,6 +395,7 @@ export const ContentProvider = ({ children }) => {
             updateCategoryName,
             addCategory,
             deleteCategory,
+            setCategories,
             exportData,
             undo,
             redo,

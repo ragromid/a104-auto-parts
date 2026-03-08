@@ -24,10 +24,13 @@
         "Optics": "Optika"
     },
     "ui": {
-        "searchPlaceholder": "Məhsulları axtarın...",
+        "searchPlaceholder": "Avtoehtiyyat hissələrini axtarın...",
         "results": "Nəticə",
         "latestArrivals": "Yeni Gələnlər",
-        "noProducts": "Məhsul tapılmadı.",
+        "noProducts": "Bu kateqoriyada məhsul tapılmadı.",
+        "aboutUsTitle": "KNK AVTO HAQQINDA",
+        "aboutUsHeading": "Avtomobiliniz üçün premium keyfiyyətli ehtiyat hissələri.",
+        "aboutUsDescription": "KNK AVTO (a104.az) yüksək performanslı avtomobil komponentləri üçün etibarlı ünvanınızdır. Biz NGK, Brembo və Castrol kimi dünya şöhrətli brendlərin yüksək səviyyəli məhsullarını təmin etməkdə ixtisaslaşmışıq ki, bu da avtomobilinizin ən yüksək səviyyədə işləməsini təmin edir.",
         "shopNow": "İndi Al",
         "experience": "Kəşf et",
         "garage": "Qaraj",

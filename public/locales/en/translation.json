@@ -24,10 +24,13 @@
         "Optics": "Optics"
     },
     "ui": {
-        "searchPlaceholder": "Search products...",
+        "searchPlaceholder": "Search auto parts...",
         "results": "Results",
         "latestArrivals": "Latest Arrivals",
-        "noProducts": "No products found.",
+        "noProducts": "No products found in this category.",
+        "aboutUsTitle": "About KNK AVTO",
+        "aboutUsHeading": "Premium Quality Auto Parts for Your Vehicle.",
+        "aboutUsDescription": "KNK AVTO (a104.az) is your trusted destination for high-performance automotive components. We specialize in sourcing and providing top-tier products from world-renowned brands like NGK, Brembo, and Castrol, ensuring your vehicle performs at its peak.",
         "shopNow": "Shop Now",
         "experience": "Experience",
         "garage": "Garage",

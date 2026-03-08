@@ -8,6 +8,7 @@ import Header from './components/Header';
 import CategoryChips from './components/CategoryChips';
 import ProductCard from './components/ProductCard';
 import SplashScreen from './components/SplashScreen';
+import AboutUs from './components/AboutUs';
 import BottomNav from './components/BottomNav';
 const CategoryBottomSheet = React.lazy(() => import('./components/CategoryBottomSheet'));
 const CartDrawer = React.lazy(() => import('./components/CartDrawer'));
@@ -17,6 +18,7 @@ import { ContentProvider } from './context/ContentContext';
 import ExpandedProductCard from './components/ExpandedProductCard';
 import AddIcon from '@mui/icons-material/Add';
 import { fetchAndStoreImage } from './lib/imagePersistence';
+import Pagination from './components/Pagination';
 
 
 // ... (top of file)
@@ -58,10 +60,40 @@ const containerVariants = {
   visible: {
     opacity: 1,
     transition: {
-      staggerChildren: 0.1,
-      delayChildren: 0.2,
+      staggerChildren: 0.05,
+      delayChildren: 0.1,
     },
   },
+};
+
+const slideVariants = {
+  enter: (direction) => ({
+    x: direction > 0 ? 100 : -100,
+    opacity: 0,
+    filter: 'blur(4px)',
+  }),
+  center: {
+    zIndex: 1,
+    x: 0,
+    opacity: 1,
+    filter: 'blur(0px)',
+    transition: {
+      x: { type: "spring", stiffness: 300, damping: 30 },
+      opacity: { duration: 0.2 },
+      filter: { duration: 0.2 }
+    }
+  },
+  exit: (direction) => ({
+    zIndex: 0,
+    x: direction < 0 ? 100 : -100,
+    opacity: 0,
+    filter: 'blur(4px)',
+    transition: {
+      x: { type: "spring", stiffness: 300, damping: 30 },
+      opacity: { duration: 0.2 },
+      filter: { duration: 0.2 }
+    }
+  })
 };
 
 const itemVariants = {
@@ -73,8 +105,9 @@ const itemVariants = {
   },
   exit: {
     opacity: 0,
-    scale: 0,
-    transition: { duration: 0.25, type: 'tween', ease: 'backIn' } // Using 'tween' avoids spring physics on exit for cleaner pop
+    scale: 0.95,
+    filter: 'blur(4px)',
+    transition: { duration: 0.2 }
   }
 };
 
@@ -96,6 +129,18 @@ function AppContent() {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [justCreatedId, setJustCreatedId] = useState(null);
 
+  // Pagination State
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(12);
+  const [direction, setDirection] = useState(0);
+
+  const handlePageChange = (newPage, newDirection) => {
+    setDirection(newDirection);
+    setCurrentPage(newPage);
+    const grid = document.getElementById('product-grid');
+    if (grid) grid.scrollIntoView({ behavior: 'smooth' });
+  };
+
   const handleProductSelect = React.useCallback((id) => {
     setSelectedProductId(id);
   }, []);
@@ -111,6 +156,12 @@ function AppContent() {
 
   const [activeCategory, setActiveCategory] = useState('All');
   const [searchTerm, setSearchTerm] = useState('');
+
+  // Reset page on filter change
+  useEffect(() => {
+    setCurrentPage(1);
+    setDirection(0);
+  }, [activeCategory, searchTerm]);
 
   // Preload Initial Images
   useEffect(() => {
@@ -198,6 +249,12 @@ function AppContent() {
       return matchesCategory && matchesSearch;
     });
   }, [products, activeCategory, searchTerm]);
+
+  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
+  const paginatedProducts = useMemo(() => {
+    const start = (currentPage - 1) * itemsPerPage;
+    return filteredProducts.slice(start, start + itemsPerPage);
+  }, [filteredProducts, currentPage, itemsPerPage]);
 
   // Resolve Category Name from ID
   const activeCategoryName = useMemo(() => {
@@ -300,6 +357,9 @@ function AppContent() {
               {/* Content Logic: Show Hero/Categories only on 'home' */}
               {!showMobileSearch && (
                 <>
+                  {/* About Us Section */}
+                  <AboutUs />
+
                   {/* Categories - Sticky */}
                   <motion.div
                     initial={{ opacity: 0, y: -20 }}
@@ -393,38 +453,49 @@ function AppContent() {
                   </div>
                 )}
 
-                {filteredProducts.length > 0 ? (
-                  <motion.div
-                    layout
-                    variants={containerVariants}
-                    initial="hidden"
-                    animate="visible"
-                    className="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6 lg:gap-8"
-                  >
-                    <AnimatePresence mode="popLayout">
-                      {filteredProducts.map((product, index) => (
-                        <motion.div
-                          key={product.id}
-                          layout
-                          variants={itemVariants}
-                          initial="hidden"
-                          {...(index < 3 ? { animate: 'visible' } : { whileInView: 'visible', viewport: { once: true, amount: 0.1 } })}
-                          exit="exit"
-                          className="h-full"
-                        >
-                          <ProductCard
-                            product={product}
-                            onSelect={handleProductSelect}
-                          />
-                        </motion.div>
-                      ))}
+                {paginatedProducts.length > 0 ? (
+                  <div className="overflow-hidden">
+                    <AnimatePresence mode="wait" custom={direction}>
+                      <motion.div
+                        key={currentPage}
+                        custom={direction}
+                        variants={slideVariants}
+                        initial="enter"
+                        animate="center"
+                        exit="exit"
+                        layout
+                        className="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6 lg:gap-8"
+                      >
+                        {paginatedProducts.map((product, index) => (
+                          <motion.div
+                            key={product.id}
+                            layout
+                            variants={itemVariants}
+                            initial="hidden"
+                            {...(index < 3 && currentPage === 1 ? { animate: 'visible' } : { animate: 'visible' })}
+                            exit="exit"
+                            className="h-full"
+                          >
+                            <ProductCard
+                              product={product}
+                              onSelect={handleProductSelect}
+                            />
+                          </motion.div>
+                        ))}
+                      </motion.div>
                     </AnimatePresence>
-                  </motion.div>
+                  </div>
                 ) : (
                   <div className="text-center py-20 text-gray-500">
                     <p>{t('ui.noProducts')}</p>
                   </div>
                 )}
+
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  onPageChange={handlePageChange}
+                />
               </div>
             </main>
 
