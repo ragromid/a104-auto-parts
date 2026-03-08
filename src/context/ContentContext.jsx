@@ -54,13 +54,21 @@ export const ContentProvider = ({ children }) => {
     const [products, setProducts] = useState(() => {
         if (useDb) return []; // Will fetch on mount
         const saved = localStorage.getItem('site_products');
-        return saved ? JSON.parse(saved) : initialProducts;
+        if (saved) {
+            const parsed = JSON.parse(saved);
+            if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        }
+        return initialProducts;
     });
 
     const [categories, setCategories] = useState(() => {
         if (useDb) return []; // Fetch on mount
         const saved = localStorage.getItem('site_categories');
-        return saved ? JSON.parse(saved) : initialCategories;
+        if (saved) {
+            const parsed = JSON.parse(saved);
+            if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        }
+        return initialCategories;
     });
 
     const [dbError, setDbError] = useState(null);

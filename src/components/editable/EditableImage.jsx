@@ -4,6 +4,8 @@ import { useTranslation } from 'react-i18next';
 import EditIcon from '@mui/icons-material/Edit';
 import { supabase } from '../../lib/supabase'; // Import our configured client
 import { deleteImageFromStorage } from '../../lib/storage';
+import CachedImage from '../CachedImage';
+import { removeLocalImage } from '../../lib/imagePersistence';
 
 const EditableImage = ({ src, onSave, alt, className = '', containerClassName = '' }) => {
     const { isAdminMode } = useAuth();
@@ -61,6 +63,7 @@ const EditableImage = ({ src, onSave, alt, className = '', containerClassName = 
             // Cleanup the OLD image from storage if it exists (since we just replaced it)
             if (src) {
                 await deleteImageFromStorage(src);
+                await removeLocalImage(src);
             }
         } catch (error) {
             console.error("Error in image upload flow:", error);
@@ -72,7 +75,7 @@ const EditableImage = ({ src, onSave, alt, className = '', containerClassName = 
     };
 
     if (!isAdminMode) {
-        return <img src={src} alt={alt} className={className} loading="lazy" decoding="async" />;
+        return <CachedImage src={src} alt={alt} className={className} />;
     }
 
     return (
@@ -80,7 +83,7 @@ const EditableImage = ({ src, onSave, alt, className = '', containerClassName = 
             className={`relative group w-full h-full ${containerClassName}`}
             onClick={handleEditClick}
         >
-            <img src={src} alt={alt} className={`${className} ${isUploading ? 'opacity-50 blur-sm' : ''}`} loading="lazy" decoding="async" />
+            <CachedImage src={src} alt={alt} className={`${className} ${isUploading ? 'opacity-50 blur-sm' : ''}`} />
 
             <div className={`absolute inset-0 bg-black/50 ${isUploading ? 'opacity-100 flex' : 'opacity-0 group-hover:opacity-100 flex'} items-center justify-center cursor-pointer transition-opacity duration-200`}>
                 <div className="bg-white text-gray-900 px-3 py-1 rounded-full text-sm font-medium flex items-center gap-1 shadow-lg">

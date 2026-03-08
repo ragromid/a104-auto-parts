@@ -16,6 +16,7 @@ import { AuthProvider } from './context/AuthContext';
 import { ContentProvider } from './context/ContentContext';
 import ExpandedProductCard from './components/ExpandedProductCard';
 import AddIcon from '@mui/icons-material/Add';
+import { fetchAndStoreImage } from './lib/imagePersistence';
 
 
 // ... (top of file)
@@ -110,6 +111,16 @@ function AppContent() {
 
   const [activeCategory, setActiveCategory] = useState('All');
   const [searchTerm, setSearchTerm] = useState('');
+
+  // Preload Initial Images
+  useEffect(() => {
+    if (products.length > 0) {
+      const imagesToPreload = products.slice(0, 3).map(p => p.image);
+      imagesToPreload.forEach(src => {
+        fetchAndStoreImage(src);
+      });
+    }
+  }, [products]);
 
   // Check URL for direct product links on load
   useEffect(() => {
@@ -387,18 +398,17 @@ function AppContent() {
                     layout
                     variants={containerVariants}
                     initial="hidden"
-                    whileInView="visible"
-                    viewport={{ once: true, amount: 0.2 }}
+                    animate="visible"
                     className="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6 lg:gap-8"
                   >
                     <AnimatePresence mode="popLayout">
-                      {filteredProducts.map((product) => (
+                      {filteredProducts.map((product, index) => (
                         <motion.div
                           key={product.id}
                           layout
                           variants={itemVariants}
                           initial="hidden"
-                          animate="visible"
+                          {...(index < 3 ? { animate: 'visible' } : { whileInView: 'visible', viewport: { once: true, amount: 0.1 } })}
                           exit="exit"
                           className="h-full"
                         >
