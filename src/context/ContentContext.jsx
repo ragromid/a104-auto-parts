@@ -2,14 +2,46 @@ import React, { createContext, useState, useContext, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { deleteImageFromStorage } from '../lib/storage';
 
-const initialCategories = [];
+const initialCategories = [
+    { id: 'Engine', name: 'Engine', children: [] },
+    { id: 'Brakes', name: 'Brakes', children: [] },
+    { id: 'Lighting', name: 'Lighting', children: [] }
+];
 
 // We need initial products from somewhere. 
 // Since they were hardcoded in App.jsx, I'll need to move them here or allow passing them in.
 // For now, I'll define a default empty list or expect them to be initialized.
 // Actually, to avoid breaking execution, I'll copy the initial products here as a default fallback.
 
-const initialProducts = [];
+const initialProducts = [
+    {
+        id: 'p1',
+        name: 'NGK Iridium IX Spark Plug',
+        sku: 'BKR6EIX',
+        category: 'Engine',
+        info: 'High-performance iridium spark plug designed for improved throttle response and ignition efficiency.',
+        image: 'https://images.unsplash.com/photo-1635437536607-b8572f443763?q=80&w=800&auto=format&fit=crop',
+        images: ['https://images.unsplash.com/photo-1635437536607-b8572f443763?q=80&w=800&auto=format&fit=crop']
+    },
+    {
+        id: 'p2',
+        name: 'Brembo Ceramic Brake Pads',
+        sku: 'P06037N',
+        category: 'Brakes',
+        info: 'Premium ceramic brake pads offering superior stopping power, low dust, and quiet operation.',
+        image: 'https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?q=80&w=800&auto=format&fit=crop',
+        images: ['https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?q=80&w=800&auto=format&fit=crop']
+    },
+    {
+        id: 'p3',
+        name: 'Castrol EDGE 5W-30 Full Synthetic',
+        sku: 'CAS-5W30-4L',
+        category: 'Engine',
+        info: 'Advanced full synthetic motor oil that provides maximum engine performance and protection.',
+        image: 'https://images.unsplash.com/photo-1621905252507-b35482cdca4b?q=80&w=800&auto=format&fit=crop',
+        images: ['https://images.unsplash.com/photo-1621905252507-b35482cdca4b?q=80&w=800&auto=format&fit=crop']
+    }
+];
 
 const ContentContext = createContext();
 
