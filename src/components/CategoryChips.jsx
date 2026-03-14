@@ -232,7 +232,7 @@ const CategoryChips = ({ activeCategory, onSelectCategory }) => {
                     ref={sliderRef}
                     className="w-full py-3 px-4 overflow-x-auto no-scrollbar"
                 >
-                    <div className="flex flex-nowrap space-x-3 w-max items-center touch-none">
+                    <div className="flex flex-nowrap space-x-3 w-max items-center">
                         <AnimatePresence mode="popLayout">
                             {history.length > 0 && (
                                 <motion.button
