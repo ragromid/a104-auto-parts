@@ -21,7 +21,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import CloseIcon from '@mui/icons-material/Close';
 
 const CategoryManager = ({ isOpen, onClose }) => {
-    const { categories, setCategories } = useContent();
+    const { categories, setCategories, moveCategory } = useContent();
     const [activeId, setActiveId] = useState(null);
 
     const sensors = useSensors(
@@ -42,65 +42,19 @@ const CategoryManager = ({ isOpen, onClose }) => {
     const handleDragEnd = (event) => {
         const { active, over } = event;
         setActiveId(null);
-
-        if (!over) return;
-
-        if (active.id !== over.id) {
-            setCategories((items) => {
-                // Find all items in a flat list first for easier processing
-                const flatten = (list) => list.reduce((acc, item) => [
-                    ...acc,
-                    item,
-                    ...(item.children ? flatten(item.children) : [])
-                ], []);
-
-                const findAndRemove = (list, id) => {
-                    for (let i = 0; i < list.length; i++) {
-                        if (list[i].id === id) {
-                            const [removed] = list.splice(i, 1);
-                            return removed;
-                        }
-                        if (list[i].children) {
-                            const found = findAndRemove(list[i].children, id);
-                            if (found) return found;
-                        }
-                    }
-                    return null;
-                };
-
-                const findAndAdd = (list, targetId, itemToAdd) => {
-                    for (let i = 0; i < list.length; i++) {
-                        if (list[i].id === targetId) {
-                            list[i].children = [...(list[i].children || []), itemToAdd];
-                            return true;
-                        }
-                        if (list[i].children) {
-                            const added = findAndAdd(list[i].children, targetId, itemToAdd);
-                            if (added) return true;
-                        }
-                    }
-                    return false;
-                };
-
-                const newCategories = JSON.parse(JSON.stringify(items));
-                const activeItem = findAndRemove(newCategories, active.id);
-
-                // If over is a top-level item or we want to reorder
-                const overIndex = newCategories.findIndex(c => c.id === over.id);
-                if (overIndex !== -1) {
-                    newCategories.splice(overIndex, 0, activeItem);
-                } else {
-                    // Try to add as a child of 'over'
-                    findAndAdd(newCategories, over.id, activeItem);
-                }
-
-                return newCategories;
-            });
+        if (over && active.id !== over.id) {
+            moveCategory(active.id, over.id);
         }
     };
 
-    // Flatten tree for flat sortable list (simplified approach first)
-    // const flatCategories = categories; // This is no longer needed
+    const getAllIds = (items) => {
+        let ids = [];
+        items.forEach(item => {
+            ids.push(item.id);
+            if (item.children) ids = [...ids, ...getAllIds(item.children)];
+        });
+        return ids;
+    };
 
     const renderTree = (items, depth = 0) => {
         return items.map((category) => (
@@ -115,12 +69,9 @@ const CategoryManager = ({ isOpen, onClose }) => {
         ));
     };
 
-    // Helper to find an item in a nested structure for DragOverlay
     const findItemInTree = (items, id) => {
         for (const item of items) {
-            if (item.id === id) {
-                return item;
-            }
+            if (item.id === id) return item;
             if (item.children) {
                 const found = findItemInTree(item.children, id);
                 if (found) return found;
@@ -128,6 +79,8 @@ const CategoryManager = ({ isOpen, onClose }) => {
         }
         return null;
     };
+
+    const allIds = getAllIds(categories);
 
     return (
         <AnimatePresence>
@@ -163,7 +116,7 @@ const CategoryManager = ({ isOpen, onClose }) => {
                                 onDragStart={handleDragStart}
                                 onDragEnd={handleDragEnd}
                             >
-                                <SortableContext items={categories.map(c => c.id)} strategy={verticalListSortingStrategy}>
+                                <SortableContext items={allIds} strategy={verticalListSortingStrategy}>
                                     {renderTree(categories)}
                                 </SortableContext>
                                 <DragOverlay>

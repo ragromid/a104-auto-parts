@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import SearchIcon from '@mui/icons-material/Search';
-import LocationOnOutlinedIcon from '@mui/icons-material/LocationOnOutlined';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined';
 import ShoppingBagOutlinedIcon from '@mui/icons-material/ShoppingBagOutlined';
 import LightModeOutlinedIcon from '@mui/icons-material/LightModeOutlined';
@@ -12,7 +12,7 @@ import { motion, AnimatePresence, useScroll, useTransform, useMotionTemplate } f
 import { useTranslation } from 'react-i18next';
 import LanguageIcon from '@mui/icons-material/Language';
 
-const Header = ({ darkMode, toggleDarkMode, searchTerm, onSearchChange, onOpenSettings }) => {
+const Header = ({ darkMode, toggleDarkMode, searchTerm, onSearchChange, onOpenSettings, onToggleAbout }) => {
     const { isAdminMode } = useAuth();
     const { toggleCart, getCartCount } = useCart();
     const { dbError } = useContent();
@@ -52,10 +52,11 @@ const Header = ({ darkMode, toggleDarkMode, searchTerm, onSearchChange, onOpenSe
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         transition={{ delay: 0.1 }}
+                        onClick={onToggleAbout}
                         className="hidden md:flex items-center text-sm text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-primary-light cursor-pointer transition-colors"
                     >
-                        <LocationOnOutlinedIcon style={{ fontSize: 18 }} className="mr-1.5" />
-                        <span>{t('ui.location')}</span>
+                        <InfoOutlinedIcon style={{ fontSize: 18 }} className="mr-1.5" />
+                        <span>{t('ui.aboutUsTitle', 'About Us')}</span>
                     </motion.div>
                 </div>
 

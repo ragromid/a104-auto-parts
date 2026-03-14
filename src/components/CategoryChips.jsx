@@ -1,47 +1,157 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import GridViewIcon from '@mui/icons-material/GridView';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import AddIcon from '@mui/icons-material/Add';
 import CloseIcon from '@mui/icons-material/Close';
-import { motion, LayoutGroup, AnimatePresence } from 'framer-motion';
-// import { categories as allCategories } from '../data/categories'; // REMOVED - Using context
+import { motion, AnimatePresence } from 'framer-motion';
 import { useContent } from '../context/ContentContext';
 import { useAuth } from '../context/AuthContext';
 import EditableText from './editable/EditableText';
 
-const CategoryChips = ({ activeCategory, onSelectCategory, onOpenSheet }) => {
+import {
+    DndContext,
+    closestCorners,
+    KeyboardSensor,
+    PointerSensor,
+    useSensor,
+    useSensors,
+    DragOverlay,
+} from '@dnd-kit/core';
+
+import {
+    arrayMove,
+    SortableContext,
+    sortableKeyboardCoordinates,
+    horizontalListSortingStrategy,
+    useSortable,
+} from '@dnd-kit/sortable';
+
+import { CSS } from '@dnd-kit/utilities';
+
+const SortableChip = ({
+    category,
+    isActive,
+    onSelect,
+    isAdminMode,
+    updateName,
+    addSub,
+    deleteCat,
+    t,
+    isTouch
+}) => {
+
+    const {
+        attributes,
+        listeners,
+        setNodeRef,
+        transform,
+        transition,
+        isDragging
+    } = useSortable({ id: category.id, disabled: !isAdminMode });
+
+    const style = {
+        transform: CSS.Transform.toString(transform),
+        transition,
+        zIndex: isDragging ? 50 : 10,
+        opacity: isDragging ? 0.3 : 1
+    };
+
+    const hasChildren = category.children && category.children.length > 0;
+
+    return (
+        <motion.div
+            ref={setNodeRef}
+            style={style}
+            whileHover={!isTouch && !isDragging ? { scale: 1.02, y: -2 } : {}}
+            whileTap={!isDragging ? { scale: 0.98 } : {}}
+            transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+            onClick={() => !isDragging && onSelect(category)}
+            className={`relative px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 snap-start flex-shrink-0 flex items-center gap-2 cursor-pointer select-none group
+            ${isActive
+                    ? 'text-white dark:text-gray-900 shadow-lg'
+                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 bg-gray-50 dark:bg-zinc-800/50 border border-gray-100 dark:border-white/5'
+                }`}
+        >
+            {isActive && (
+                <motion.div
+                    layoutId="activePill"
+                    className="absolute inset-0 bg-gray-900 dark:bg-white rounded-full -z-10"
+                />
+            )}
+
+            {isAdminMode && (
+                <div
+                    {...attributes}
+                    {...listeners}
+                    className="p-1 -ml-1 rounded hover:bg-black/10 dark:hover:bg-white/10 cursor-grab active:cursor-grabbing opacity-40 hover:opacity-100 transition-opacity"
+                    onClick={(e) => e.stopPropagation()}
+                >
+                    <GridViewIcon style={{ fontSize: 14 }} />
+                </div>
+            )}
+
+            <div className="flex items-center gap-1.5">
+                <EditableText
+                    value={t(`filters.${category.name}`, category.name)}
+                    onSave={(val) => updateName(category.id, val)}
+                />
+
+                {isAdminMode && (
+                    <div className="flex items-center gap-0.5 ml-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                addSub(category.id);
+                            }}
+                            className="p-1 rounded-full text-green-500 hover:bg-green-100 dark:hover:bg-green-900/30"
+                        >
+                            <AddIcon style={{ fontSize: 14 }} />
+                        </button>
+                        <button
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                deleteCat(category.id);
+                            }}
+                            className="p-1 rounded-full text-red-400 hover:bg-red-100 dark:hover:bg-red-900/30"
+                        >
+                            <CloseIcon style={{ fontSize: 14 }} />
+                        </button>
+                    </div>
+                )}
+
+                {hasChildren && (
+                    <span className="opacity-40 text-[10px]">▼</span>
+                )}
+            </div>
+        </motion.div>
+    );
+};
+
+const CategoryChips = ({ activeCategory, onSelectCategory }) => {
     const { t } = useTranslation();
-    const { categories: allCategories, updateCategoryName, addCategory, deleteCategory } = useContent();
+    const { categories, updateCategoryName, addCategory, deleteCategory, moveCategory } = useContent();
     const { isAdminMode } = useAuth();
 
-    // Check for touch device
     const isTouch = typeof window !== 'undefined' && window.matchMedia('(hover: none)').matches;
 
-    const [currentLevel, setCurrentLevel] = useState(allCategories);
-    const [viewParentId, setViewParentId] = useState(null); // Track which category's children we are viewing
-    const [history, setHistory] = useState([]); // Stores { list, parentId } of previous levels
+    const [viewParentId, setViewParentId] = useState(null);
+    const [history, setHistory] = useState([]);
+    const [currentLevel, setCurrentLevel] = useState([]);
+    const [activeId, setActiveId] = useState(null);
 
-    // Sync currentLevel when allCategories changes (e.g. added new category)
-    useEffect(() => {
-        if (viewParentId) {
-            // We are looking at a subcategory. Re-find it in the updated allCategories to get fresh children.
-            const parent = findCategory(viewParentId, allCategories);
-            if (parent && parent.children) {
-                setCurrentLevel(parent.children);
-            } else {
-                // Parent deleted? Fallback to root
-                setCurrentLevel(allCategories);
-                setViewParentId(null);
-                setHistory([]);
-            }
-        } else {
-            // At root
-            setCurrentLevel(allCategories);
-        }
-    }, [allCategories, viewParentId]);
+    const sliderRef = useRef(null);
 
-    // Helper to find category by ID recursively
+    const sensors = useSensors(
+        useSensor(PointerSensor, {
+            activationConstraint: { distance: 8 }
+        }),
+        useSensor(KeyboardSensor, {
+            coordinateGetter: sortableKeyboardCoordinates
+        })
+    );
+
     const findCategory = (id, list) => {
         for (const cat of list) {
             if (cat.id === id) return cat;
@@ -53,266 +163,158 @@ const CategoryChips = ({ activeCategory, onSelectCategory, onOpenSheet }) => {
         return null;
     };
 
-    // Helper to get parent chain (unused but kept for reference or future use)
-    const getParentChain = (id, list, chain = []) => {
-        for (const cat of list) {
-            if (cat.id === id) return chain;
-            if (cat.children) {
-                const result = getParentChain(id, cat.children, [...chain, list]);
-                if (result) return result;
-            }
-        }
-        return null;
-    };
-
-    // Sync UI with activeCategory if changed externally (e.g. from drawer)
     useEffect(() => {
-        if (activeCategory === 'All') {
-            if (viewParentId !== null) {
-                // Only reset if not already at root, or strictly enforce?
-                // User might want to browse categories without selecting?
-                // Let's force reset for consistency.
-                setViewParentId(null);
-                setHistory([]);
-                // currentLevel sync handled by dependency on viewParentId=null above?
-                // No, dependency is [allCategories, viewParentId]. Setting viewParentId triggers effect.
+        if (viewParentId) {
+            const parent = findCategory(viewParentId, categories);
+            if (parent && parent.children) {
+                setCurrentLevel(parent.children);
+                return;
             }
-            return;
         }
-        // ... (rest of logic omitted/simplified)
-    }, [activeCategory]);
-
+        setCurrentLevel(categories);
+    }, [categories, viewParentId]);
 
     const handleCategoryClick = (category) => {
         const hasChildren = category.children && category.children.length > 0;
-
-        // Allow navigation if children exist OR if we are admin (so we can add children to empty categories)
         if (hasChildren || isAdminMode) {
             setHistory([...history, { list: currentLevel, parentId: viewParentId }]);
             setCurrentLevel(category.children || []);
             setViewParentId(category.id);
         }
-        // Always select the category (even parent categories can be selected filters)
         onSelectCategory(category.id);
     };
 
     const handleBack = () => {
         if (history.length > 0) {
-            const lastState = history[history.length - 1];
-            setCurrentLevel(lastState.list);
-            setViewParentId(lastState.parentId);
+            const last = history[history.length - 1];
+            setCurrentLevel(last.list);
+            setViewParentId(last.parentId);
             setHistory(history.slice(0, -1));
         }
     };
 
-    const handleAddCategory = () => {
-        // Instantly add a new category to the CURRENT view (viewParentId)
-        addCategory(viewParentId);
+    const handleDragStart = (event) => {
+        if (!isAdminMode) return;
+        setActiveId(event.active.id);
     };
 
-    // Ref for scrolling container
-    const sliderRef = useRef(null);
+    const handleDragEnd = (event) => {
+        const { active, over } = event;
+        setActiveId(null);
+        if (!over || active.id === over.id) return;
 
-    // Manual horizontal scroll with mouse wheel (PC)
-    useEffect(() => {
-        const slider = sliderRef.current;
-        if (!slider) return;
+        const oldIndex = currentLevel.findIndex(i => i.id === active.id);
+        const newIndex = currentLevel.findIndex(i => i.id === over.id);
 
-        let target = slider.scrollLeft;
-        let isAnimating = false;
-        let animationFrameId;
+        if (oldIndex !== -1 && newIndex !== -1) {
+            const newOrder = arrayMove(currentLevel, oldIndex, newIndex);
+            setCurrentLevel(newOrder);
+            moveCategory(active.id, over.id);
+        }
+    };
 
-        const update = () => {
-            if (!slider) return;
-
-            // Linear interpolation (Lerp) for smooth scrolling
-            // factor 0.1 determines the "weight" or smoothness (lower = smoother/slower)
-            slider.scrollLeft += (target - slider.scrollLeft) * 0.1;
-
-            if (Math.abs(target - slider.scrollLeft) > 1) {
-                animationFrameId = requestAnimationFrame(update);
-                isAnimating = true;
-            } else {
-                isAnimating = false;
-            }
-        };
-
-        const handleWheel = (e) => {
-            if (e.deltaY === 0) return;
-            // If deltaX is present (shift key or trackpad), let native scroll handle it
-            if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
-
-            e.preventDefault();
-
-            // If animation has stopped, sync target to current position to avoid jumps
-            if (!isAnimating) {
-                target = slider.scrollLeft;
-            }
-
-            // Add delta to target
-            target += e.deltaY;
-
-            // Clamp target to bounds
-            target = Math.max(0, Math.min(slider.scrollWidth - slider.clientWidth, target));
-
-            // Start animation loop if not running
-            if (!isAnimating) {
-                update();
-            }
-        };
-
-        slider.addEventListener('wheel', handleWheel, { passive: false });
-        return () => {
-            slider.removeEventListener('wheel', handleWheel);
-            cancelAnimationFrame(animationFrameId);
-        };
-    }, []);
+    const handleAllClick = () => {
+        setHistory([]);
+        setCurrentLevel(categories);
+        setViewParentId(null);
+        onSelectCategory('All');
+    };
 
     return (
-        <div className="w-full mask-gradient [-webkit-mask-image:linear-gradient(to_right,transparent,black_20px,black_90%,transparent)] overflow-hidden">
-            <motion.div
-                ref={sliderRef}
-                data-lenis-prevent // Prevent Lenis from hijacking scroll
-                className="w-full py-3 px-4 sm:px-6 lg:px-8 overflow-x-auto no-scrollbar"
+        <div className="w-full overflow-hidden">
+            <DndContext
+                sensors={sensors}
+                collisionDetection={closestCorners}
+                onDragStart={handleDragStart}
+                onDragEnd={handleDragEnd}
             >
-                <div
-                    className="flex flex-nowrap space-x-3 w-max items-center"
+                <motion.div
+                    ref={sliderRef}
+                    className="w-full py-3 px-4 overflow-x-auto no-scrollbar"
                 >
-                    <LayoutGroup id="categories">
-
-                        {/* Back Button */}
-                        <AnimatePresence>
+                    <div className="flex flex-nowrap space-x-3 w-max items-center touch-none">
+                        <AnimatePresence mode="popLayout">
                             {history.length > 0 && (
                                 <motion.button
-                                    initial={{ opacity: 0, scale: 0.8, x: -20 }}
+                                    initial={{ opacity: 0, scale: 0.8, x: -10 }}
                                     animate={{ opacity: 1, scale: 1, x: 0 }}
-                                    exit={{ opacity: 0, scale: 0.8, x: -20 }}
-                                    className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-100 dark:bg-white/10 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-white/20 transition-colors shrink-0 z-20 backdrop-blur-sm shadow-sm mr-2"
+                                    exit={{ opacity: 0, scale: 0.8, x: -10 }}
+                                    whileHover={{ scale: 1.1 }}
+                                    whileTap={{ scale: 0.9 }}
                                     onClick={handleBack}
+                                    className="flex items-center justify-center w-10 h-10 rounded-2xl bg-gray-100 dark:bg-white/5 text-gray-400 hover:text-gray-900 dark:hover:text-white transition-all shadow-sm border border-transparent hover:border-gray-200 dark:hover:border-white/10 flex-shrink-0"
                                 >
                                     <ArrowBackIcon fontSize="small" />
                                 </motion.button>
                             )}
                         </AnimatePresence>
 
-                        {/* All Button (Only at root) */}
                         {history.length === 0 && (
-                            <motion.button
-                                layout
-                                whileHover={!isTouch ? { scale: 1.03, y: -4 } : {}}
-                                whileTap={{ scale: 0.97 }}
-                                transition={{ type: 'spring', stiffness: 150, damping: 10 }}
-                                onClick={() => onSelectCategory('All')}
-                                className={`
-                  relative px-5 py-2.5 rounded-full text-sm font-medium transition-colors duration-200 z-10 snap-start flex-shrink-0
-                  ${activeCategory === 'All'
-                                        ? 'text-white dark:text-gray-900'
-                                        : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
-                                    }
-                `}
+                            <motion.div
+                                whileHover={!isTouch ? { scale: 1.02, y: -2 } : {}}
+                                whileTap={{ scale: 0.98 }}
+                                transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+                                onClick={handleAllClick}
+                                className={`relative px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 snap-start flex-shrink-0 flex items-center gap-2 cursor-pointer select-none group
+                                ${activeCategory === 'All'
+                                        ? 'text-white dark:text-gray-900 shadow-lg'
+                                        : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 bg-gray-50 dark:bg-zinc-800/50 border border-gray-100 dark:border-white/5'
+                                    }`}
                             >
                                 {activeCategory === 'All' && (
                                     <motion.div
                                         layoutId="activePill"
-                                        className="absolute inset-0 bg-gray-900 dark:bg-white rounded-full -z-10 shadow-sm"
-                                        transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                                        className="absolute inset-0 bg-gray-900 dark:bg-white rounded-full -z-10"
                                     />
                                 )}
-                                {t('filters.All')}
-                            </motion.button>
+                                {t('filters.All', 'All')}
+                            </motion.div>
                         )}
 
-                        {currentLevel
-                            .filter(category => category.id !== 'All')
-                            .map((category) => {
-                                const isActive = activeCategory === category.id;
-                                const hasChildren = category.children && category.children.length > 0;
-
-                                return (
-                                    <motion.div
-                                        layout
-                                        whileHover={!isTouch ? { scale: 1.03, y: -4 } : {}}
-                                        whileTap={{ scale: 0.97 }}
-                                        transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-                                        key={category.id}
-                                        onClick={() => handleCategoryClick(category)}
-                                        className={`
-                  relative px-5 py-2.5 rounded-full text-sm font-medium transition-colors duration-200 z-10 snap-start flex-shrink-0 flex items-center gap-2 cursor-pointer select-none
-                  ${isActive
-                                                ? 'text-white dark:text-gray-900'
-                                                : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
-                                            }
-                `}
-                                    >
-                                        {isActive && (
-                                            <motion.div
-                                                layoutId="activePill"
-                                                className="absolute inset-0 bg-gray-900 dark:bg-white rounded-full -z-10 shadow-sm"
-                                                transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                                            />
-                                        )}
-
-                                        {/* Editable Name */}
-                                        <div onClick={(e) => isAdminMode && e.stopPropagation()}>
-                                            <EditableText
-                                                value={t(`filters.${category.name}`, category.name)}
-                                                onSave={(val) => updateCategoryName(category.id, val)}
-                                            />
-                                        </div>
-
-                                        {/* Add Subcategory Button */}
-                                        {isAdminMode && (
-                                            <div
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    addCategory(category.id);
-                                                }}
-                                                className="ml-1 w-5 h-5 flex items-center justify-center rounded-full text-green-500 hover:text-green-700 hover:bg-green-100 dark:hover:bg-green-900/30 transition-all opacity-0 group-hover:opacity-100 sm:opacity-100"
-                                                title="Add Subcategory"
-                                            >
-                                                <AddIcon style={{ fontSize: 14 }} />
-                                            </div>
-                                        )}
-
-                                        {/* Delete Category Button */}
-                                        {isAdminMode && (
-                                            <div
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    // Optional: Confirm if contains items? For now instant.
-                                                    deleteCategory(category.id);
-                                                }}
-                                                className="ml-1 w-5 h-5 flex items-center justify-center rounded-full text-red-400 hover:text-red-600 hover:bg-red-100 dark:hover:bg-red-900/30 transition-all opacity-0 group-hover:opacity-100 sm:opacity-100"
-                                                title="Delete Category"
-                                            >
-                                                <CloseIcon style={{ fontSize: 14 }} />
-                                            </div>
-                                        )}
-
-                                        {hasChildren && (
-                                            <span className="opacity-60 text-[10px] ml-1">▼</span>
-                                        )}
-                                    </motion.div>
-                                );
-                            })}
-                    </LayoutGroup>
-
-                    {/* Add Category Button (Admin Only) */}
-                    {isAdminMode && (
-                        <motion.button
-                            layout
-                            whileTap={{ scale: 0.9 }}
-                            onClick={handleAddCategory}
-                            className="flex items-center justify-center w-10 h-10 rounded-full bg-green-500 text-white hover:bg-green-600 transition-colors shrink-0 z-20 shadow-sm ml-2"
-                            title="Add Category"
+                        <SortableContext
+                            items={currentLevel.map(c => c.id)}
+                            strategy={horizontalListSortingStrategy}
                         >
-                            <AddIcon fontSize="small" />
-                        </motion.button>
-                    )}
+                            {currentLevel.map(category => (
+                                <SortableChip
+                                    key={category.id}
+                                    category={category}
+                                    isActive={activeCategory === category.id}
+                                    onSelect={handleCategoryClick}
+                                    isAdminMode={isAdminMode}
+                                    updateName={updateCategoryName}
+                                    addSub={addCategory}
+                                    deleteCat={deleteCategory}
+                                    t={t}
+                                    isTouch={isTouch}
+                                />
+                            ))}
+                        </SortableContext>
 
+                        {isAdminMode && (
+                            <button
+                                onClick={() => addCategory(viewParentId)}
+                                className="flex items-center justify-center w-10 h-10 rounded-2xl bg-green-500/10 text-green-500 hover:bg-green-500 hover:text-white transition-all border border-green-500/20 flex-shrink-0"
+                            >
+                                <AddIcon fontSize="small" />
+                            </button>
+                        )}
+                    </div>
+                </motion.div>
 
-                </div>
-            </motion.div>
+                {createPortal(
+                    <DragOverlay dropAnimation={null}>
+                        {activeId ? (
+                            <div className="px-5 py-2.5 rounded-full bg-white dark:bg-zinc-800 shadow-2xl border flex items-center gap-2 pointer-events-none z-[9999]">
+                                <span className="text-sm font-bold">
+                                    {findCategory(activeId, categories)?.name}
+                                </span>
+                            </div>
+                        ) : null}
+                    </DragOverlay>,
+                    document.body
+                )}
+            </DndContext>
         </div>
     );
 };

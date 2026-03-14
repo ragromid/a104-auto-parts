@@ -156,6 +156,7 @@ function AppContent() {
 
   const [activeCategory, setActiveCategory] = useState('All');
   const [searchTerm, setSearchTerm] = useState('');
+  const [isAboutOpen, setIsAboutOpen] = useState(false);
 
   // Reset page on filter change
   useEffect(() => {
@@ -328,6 +329,7 @@ function AppContent() {
               onOpenSettings={() => setIsSettingsOpen(true)}
               searchTerm={searchTerm}
               onSearchChange={setSearchTerm}
+              onToggleAbout={() => setIsAboutOpen(prev => !prev)}
             />
 
             <main className="flex-1 max-w-7xl mx-auto w-full pb-24 md:pb-20">
@@ -358,7 +360,19 @@ function AppContent() {
               {!showMobileSearch && (
                 <>
                   {/* About Us Section */}
-                  <AboutUs />
+                  <AnimatePresence initial={false}>
+                    {isAboutOpen && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.3, ease: 'easeInOut' }}
+                        className="overflow-hidden"
+                      >
+                        <AboutUs />
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
 
                   {/* Categories - Sticky */}
                   <motion.div

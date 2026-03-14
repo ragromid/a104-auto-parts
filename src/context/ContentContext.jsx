@@ -8,11 +8,6 @@ const initialCategories = [
     { id: 'Lighting', name: 'Lighting', children: [] }
 ];
 
-// We need initial products from somewhere. 
-// Since they were hardcoded in App.jsx, I'll need to move them here or allow passing them in.
-// For now, I'll define a default empty list or expect them to be initialized.
-// Actually, to avoid breaking execution, I'll copy the initial products here as a default fallback.
-
 const initialProducts = [
     {
         id: 'p1',
@@ -43,6 +38,13 @@ const initialProducts = [
     }
 ];
 
+const defaultSiteSettings = {
+    aboutTitle: 'About KNK AVTO',
+    aboutHeading: 'Premium Quality Auto Parts for Your Vehicle.',
+    aboutDescription: 'KNK AVTO (a104.az) is your trusted destination for high-performance automotive components. We specialize in sourcing and providing top-tier products from world-renowned brands like NGK, Brembo, and Castrol, ensuring your vehicle performs at its peak.',
+    aboutImage: 'https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?q=80&w=800&auto=format&fit=crop'
+};
+
 const ContentContext = createContext();
 
 export const useContent = () => useContext(ContentContext);
@@ -50,9 +52,8 @@ export const useContent = () => useContext(ContentContext);
 export const ContentProvider = ({ children }) => {
     const useDb = import.meta.env.VITE_USE_DB === 'true';
 
-    // Initialize state
     const [products, setProducts] = useState(() => {
-        if (useDb) return []; // Will fetch on mount
+        if (useDb) return [];
         const saved = localStorage.getItem('site_products');
         if (saved) {
             const parsed = JSON.parse(saved);
@@ -62,7 +63,7 @@ export const ContentProvider = ({ children }) => {
     });
 
     const [categories, setCategories] = useState(() => {
-        if (useDb) return []; // Fetch on mount
+        if (useDb) return [];
         const saved = localStorage.getItem('site_categories');
         if (saved) {
             const parsed = JSON.parse(saved);
@@ -71,14 +72,18 @@ export const ContentProvider = ({ children }) => {
         return initialCategories;
     });
 
+    const [siteSettings, setSiteSettings] = useState(() => {
+        const saved = localStorage.getItem('site_settings');
+        if (saved) return { ...defaultSiteSettings, ...JSON.parse(saved) };
+        return defaultSiteSettings;
+    });
+
     const [dbError, setDbError] = useState(null);
 
-    // Initial Fetch for DB Mode
     useEffect(() => {
         if (useDb) {
             const fetchFromDB = async () => {
                 try {
-                    // Fetch Products
                     const { data: productsData, error: pErr } = await supabase
                         .from('products')
                         .select('*')
@@ -90,7 +95,6 @@ export const ContentProvider = ({ children }) => {
                         setDbError(pErr.message || "Failed to fetch products");
                     }
 
-                    // Fetch Categories
                     const { data: catData, error: cErr } = await supabase
                         .from('categories')
                         .select('*');
@@ -101,7 +105,6 @@ export const ContentProvider = ({ children }) => {
                     }
 
                     if (catData && catData.length > 0) {
-                        // Build Tree from flat DB rows
                         const map = new Map();
                         catData.forEach(c => map.set(c.id, { ...c, children: [] }));
                         const tree = [];
@@ -112,34 +115,106 @@ export const ContentProvider = ({ children }) => {
                                 tree.push(map.get(c.id));
                             }
                         });
-                        console.log("DB FETCH: Setup category tree", tree);
+
+                        // Apply custom local order if it exists
+                        const savedCats = localStorage.getItem('site_categories');
+                        if (savedCats) {
+                            try {
+                                const localTree = JSON.parse(savedCats);
+                                if (Array.isArray(localTree) && localTree.length > 0) {
+                                    const getOrderMap = (nodes) => {
+                                        const oMap = new Map();
+                                        nodes.forEach((n, idx) => oMap.set(n.id, idx));
+                                        return oMap;
+                                    };
+
+                                    const oMap = getOrderMap(localTree);
+
+                                    const sortNodes = (dbNodes, refNodes) => {
+                                        if (!refNodes || dbNodes.length === 0) return dbNodes;
+
+                                        dbNodes.sort((a, b) => {
+                                            const aIdx = oMap.has(a.id) ? oMap.get(a.id) : 9999;
+                                            const bIdx = oMap.has(b.id) ? oMap.get(b.id) : 9999;
+                                            return aIdx - bIdx;
+                                        });
+
+                                        dbNodes.forEach(node => {
+                                            const lNode = refNodes.find(ln => ln.id === node.id);
+                                            if (lNode && lNode.children && node.children) {
+                                                sortNodes(node.children, lNode.children);
+                                            }
+                                        });
+                                        return dbNodes;
+                                    };
+                                    sortNodes(tree, localTree);
+                                }
+                            } catch (e) { console.error("Error sorting categories:", e); }
+                        }
+
                         setCategories(tree);
                     } else {
-                        console.log("DB FETCH: No categories found, setting empty");
                         setCategories([]);
                     }
                 } catch (e) {
                     console.error("DB Fetch Error:", e);
                 }
+
+                // Try fetching site settings
+                try {
+                    const { data: settingsData, error: sErr } = await supabase
+                        .from('site_settings')
+                        .select('*')
+                        .eq('id', 'global')
+                        .single();
+                    if (settingsData && !sErr) {
+                        setSiteSettings(prev => ({ ...prev, ...settingsData }));
+                    }
+                } catch (e) {
+                    // Ignore, table might not exist
+                }
+
             };
             fetchFromDB();
         }
     }, [useDb]);
 
-    // Save to local storage whenever state changes (Fallback mode)
     useEffect(() => {
         if (!useDb) {
             localStorage.setItem('site_products', JSON.stringify(products));
+        }
+    }, [products, useDb]);
+
+    useEffect(() => {
+        // Prevent overwriting local storage with empty array on initial render before DB fetch finishes
+        if (categories && categories.length > 0) {
             localStorage.setItem('site_categories', JSON.stringify(categories));
         }
-    }, [products, categories, useDb]);
+    }, [categories]);
 
-    // --- History Management (Undo/Redo) ---
+    const updateSiteSetting = async (key, value) => {
+        saveSnapshot(); // Enable Undo for Settings
+        setSiteSettings(prev => {
+            const next = { ...prev, [key]: value };
+            localStorage.setItem('site_settings', JSON.stringify(next));
+            return next;
+        });
+
+        if (useDb) {
+            try {
+                const { error } = await supabase
+                    .from('site_settings')
+                    .upsert({ id: 'global', [key]: value });
+                if (error) console.log("DB settings sync failed (table might not exist):", error.message);
+            } catch (e) { }
+        }
+    };
+
     const [past, setPast] = useState([]);
     const [future, setFuture] = useState([]);
 
     const saveSnapshot = () => {
-        setPast(prev => [...prev, { products, categories }]);
+        setPast(prev => [...prev, { products, categories, siteSettings }]);
         setFuture([]);
     };
 
@@ -147,29 +222,27 @@ export const ContentProvider = ({ children }) => {
         if (past.length === 0) return;
         const previous = past[past.length - 1];
         const newPast = past.slice(0, -1);
-
-        setFuture(prev => [{ products, categories }, ...prev]);
+        setFuture(prev => [{ products, categories, siteSettings }, ...prev]);
         setProducts(previous.products);
         setCategories(previous.categories);
+        if (previous.siteSettings) setSiteSettings(previous.siteSettings);
         setPast(newPast);
-        // DB Undo sync would be complex, primarily local builder feature
     };
 
     const redo = () => {
         if (future.length === 0) return;
         const next = future[0];
         const newFuture = future.slice(1);
-
-        setPast(prev => [...prev, { products, categories }]);
+        setPast(prev => [...prev, { products, categories, siteSettings }]);
         setProducts(next.products);
         setCategories(next.categories);
+        if (next.siteSettings) setSiteSettings(next.siteSettings);
         setFuture(newFuture);
     };
 
     const canUndo = past.length > 0;
     const canRedo = future.length > 0;
 
-    // --- CRUD Operations ---
     const updateProduct = async (id, field, value) => {
         if (field === 'name' && value.length > 100) return;
         if (field === 'sku' && value.length > 50) return;
@@ -184,7 +257,6 @@ export const ContentProvider = ({ children }) => {
             if (!exists) addCategory(null, value);
         }
 
-        // Optimistic UI update
         setProducts(prev => prev.map(p => p.id === id ? { ...p, [field]: value } : p));
 
         if (useDb) {
@@ -208,7 +280,6 @@ export const ContentProvider = ({ children }) => {
             images: newProduct.images || []
         };
 
-        // Optimistic UI
         setProducts(prev => [productWithId, ...prev]);
 
         if (useDb) {
@@ -223,19 +294,15 @@ export const ContentProvider = ({ children }) => {
 
     const deleteProduct = async (id) => {
         saveSnapshot();
-
-        // Find product to get its image URL for cleanup
         const productToDelete = products.find(p => p.id === id);
         const imageUrl = productToDelete?.image;
 
         setProducts(prev => prev.filter(p => p.id !== id));
 
         if (useDb) {
-            // Cleanup associated image from Storage if it exists
             if (imageUrl) {
                 await deleteImageFromStorage(imageUrl);
             }
-
             const { error } = await supabase
                 .from('products')
                 .delete()
@@ -246,17 +313,10 @@ export const ContentProvider = ({ children }) => {
 
     const updateCategoryName = async (id, newName) => {
         if (!newName || newName.length > 50) return;
-
         saveSnapshot();
 
-        // 1. Optimistic UI Updates
-        // Update Products
         setProducts(prev => prev.map(p => p.category === id ? { ...p, category: newName } : p));
 
-        // Update Categories (Cascade rename self and children's parent references) -> Note: The tree structure 
-        // handles children inherently (they sit inside the parent's children array).
-        // If they had a parentId prop on them, we'd update it, but the tree structure relies on object nesting.
-        // We just need to ensure the parent's ID changes.
         const updateRecursive = (list) => {
             return list.map(cat => {
                 if (cat.id === id) return { ...cat, id: newName, name: newName };
@@ -266,38 +326,20 @@ export const ContentProvider = ({ children }) => {
         };
         setCategories(prev => updateRecursive(prev));
 
-        // 2. Database Synchronized Cascades
         if (useDb) {
             try {
-                // A. Update the Category's own record (id and name)
                 const { error: selfErr } = await supabase
                     .from('categories')
-                    .update({ id: newName, name: newName }) // Depending on DB config, this might require ON UPDATE CASCADE in SQL, but we manually push it here
+                    .update({ id: newName, name: newName })
                     .eq('id', id);
 
                 if (selfErr) {
                     console.error("DB Category Rename Failed", selfErr);
-                    alert("Rename failed. Your database might be out of sync, please refresh the page.\n\n" + selfErr.message);
-                    undo(); // Roll back the UI rename
-                    return; // Stop the cascade
+                    return;
                 }
 
-                // B. Update Children's parent_id (Orphan prevention)
-                const { error: childrenErr } = await supabase
-                    .from('categories')
-                    .update({ parent_id: newName })
-                    .eq('parent_id', id);
-
-                if (childrenErr) console.error("DB Children Cascade Failed", childrenErr);
-
-                // C. Update Products' category mapping
-                const { error: productsErr } = await supabase
-                    .from('products')
-                    .update({ category: newName })
-                    .eq('category', id);
-
-                if (productsErr) console.error("DB Products Cascade Failed", productsErr);
-
+                await supabase.from('categories').update({ parent_id: newName }).eq('parent_id', id);
+                await supabase.from('products').update({ category: newName }).eq('category', id);
             } catch (err) {
                 console.error("Critical Cascade Failure:", err);
             }
@@ -306,7 +348,6 @@ export const ContentProvider = ({ children }) => {
 
     const addCategory = async (parentId, newCategoryName) => {
         const safeParentId = (!parentId || parentId === 'All' || parentId === '') ? null : parentId;
-        console.log("ADD CATEGORY TRIGGERED", { originalParentId: parentId, safeParentId, newCategoryName });
         if (newCategoryName && newCategoryName.length > 50) return;
 
         saveSnapshot();
@@ -315,40 +356,27 @@ export const ContentProvider = ({ children }) => {
         const id = name;
         const newCat = { id, name, children: [] };
 
-        const addToState = () => {
-            if (!parentId || parentId === 'All') {
-                console.log("Adding to root level", newCat);
-                setCategories(prev => [...prev, newCat]);
-                return;
-            }
-            const addRecursive = (list) => {
-                return list.map(cat => {
-                    if (cat.id === parentId) {
-                        return { ...cat, children: [...(cat.children || []), newCat] };
-                    }
-                    if (cat.children) return { ...cat, children: addRecursive(cat.children) };
-                    return cat;
-                });
-            };
-            setCategories(prev => {
-                const n = addRecursive(prev);
-                console.log("Adding nested", n);
-                return n;
+        const addRecursive = (list) => {
+            return list.map(cat => {
+                if (cat.id === parentId) {
+                    return { ...cat, children: [...(cat.children || []), newCat] };
+                }
+                if (cat.children) return { ...cat, children: addRecursive(cat.children) };
+                return cat;
             });
         };
-        addToState();
+
+        if (!parentId || parentId === 'All') {
+            setCategories(prev => [...prev, newCat]);
+        } else {
+            setCategories(prev => addRecursive(prev));
+        }
 
         if (useDb) {
-            console.log("Sending to DB...");
             const { error } = await supabase
                 .from('categories')
                 .insert([{ id, name, parent_id: safeParentId }]);
-            if (error) {
-                console.error("DB Add Category Failed", error);
-                setDbError("Add Category Failed: " + error.message);
-            } else {
-                console.log("DB Add Category SUCCESS");
-            }
+            if (error) console.error("DB Add Category Failed", error);
         }
     };
 
@@ -373,6 +401,40 @@ export const ContentProvider = ({ children }) => {
         }
     };
 
+    const moveCategory = (activeId, overId) => {
+        if (!activeId || !overId || activeId === overId) return;
+
+        saveSnapshot(); // Enable Undo for Category Movement
+
+        setCategories((prev) => {
+            const newCategories = JSON.parse(JSON.stringify(prev));
+
+            const findParentAndInfo = (list, id) => {
+                for (let i = 0; i < list.length; i++) {
+                    if (list[i].id === id) return { parentList: list, index: i };
+                    if (list[i].children) {
+                        const found = findParentAndInfo(list[i].children, id);
+                        if (found) return found;
+                    }
+                }
+                return null;
+            };
+
+            const activeInfo = findParentAndInfo(newCategories, activeId);
+            const overInfo = findParentAndInfo(newCategories, overId);
+
+            if (!activeInfo || !overInfo) return prev;
+
+            const { parentList: activeList, index: activeIdx } = activeInfo;
+            const { parentList: overList, index: overIdx } = overInfo;
+
+            const [item] = activeList.splice(activeIdx, 1);
+            overList.splice(overIdx, 0, item);
+
+            return newCategories;
+        });
+    };
+
     const exportData = () => {
         const data = { products, categories };
         const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
@@ -389,6 +451,7 @@ export const ContentProvider = ({ children }) => {
             products,
             categories,
             dbError,
+            moveCategory,
             updateProduct,
             addProduct,
             deleteProduct,
@@ -396,6 +459,8 @@ export const ContentProvider = ({ children }) => {
             addCategory,
             deleteCategory,
             setCategories,
+            siteSettings,
+            updateSiteSetting,
             exportData,
             undo,
             redo,
