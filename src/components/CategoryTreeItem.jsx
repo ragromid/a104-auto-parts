@@ -5,8 +5,9 @@ import DragHandleIcon from '@mui/icons-material/DragHandle';
 import FolderIcon from '@mui/icons-material/Folder';
 import FolderOpenIcon from '@mui/icons-material/FolderOpen';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import EditableText from './editable/EditableText';
 
-const CategoryTreeItem = ({ id, category, depth = 0 }) => {
+const CategoryTreeItem = ({ id, category, depth = 0, onUpdateName }) => {
     const {
         attributes,
         listeners,
@@ -42,9 +43,12 @@ const CategoryTreeItem = ({ id, category, depth = 0 }) => {
             </div>
 
             <div className="flex-1 min-w-0">
-                <p className="font-medium text-gray-900 dark:text-gray-100 truncate">
-                    {category.name}
-                </p>
+                <h4 className="font-medium text-gray-900 dark:text-gray-100 truncate">
+                    <EditableText
+                        value={category.name}
+                        onSave={(val) => onUpdateName(category.id, val)}
+                    />
+                </h4>
                 {category.children && category.children.length > 0 && (
                     <p className="text-[10px] text-gray-500 dark:text-gray-400">
                         {category.children.length} subcategories

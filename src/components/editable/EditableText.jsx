@@ -65,7 +65,10 @@ const EditableText = ({ value, onSave, className = '', tag = 'span', multiline =
     const Tag = tag;
     return (
         <Tag
-            onClick={() => setIsEditing(true)}
+            onClick={(e) => {
+                e.stopPropagation();
+                setIsEditing(true);
+            }}
             className={`${className} cursor-pointer hover:bg-yellow-100/20 dark:hover:bg-yellow-500/20 hover:outline hover:outline-2 hover:outline-dashed hover:outline-yellow-400 rounded transition-all duration-200 relative`}
             title="Click to edit"
         >

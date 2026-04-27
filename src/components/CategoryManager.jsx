@@ -21,7 +21,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import CloseIcon from '@mui/icons-material/Close';
 
 const CategoryManager = ({ isOpen, onClose }) => {
-    const { categories, setCategories, moveCategory } = useContent();
+    const { categories, updateCategoryName, moveCategory } = useContent();
     const [activeId, setActiveId] = useState(null);
 
     const sensors = useSensors(
@@ -63,6 +63,7 @@ const CategoryManager = ({ isOpen, onClose }) => {
                     id={category.id}
                     category={category}
                     depth={depth}
+                    onUpdateName={updateCategoryName}
                 />
                 {category.children && category.children.length > 0 && renderTree(category.children, depth + 1)}
             </React.Fragment>
