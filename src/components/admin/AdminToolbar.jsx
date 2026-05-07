@@ -12,12 +12,25 @@ import UndoIcon from '@mui/icons-material/Undo';
 import RedoIcon from '@mui/icons-material/Redo';
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 import CloseIcon from '@mui/icons-material/Close';
+import CheckIcon from '@mui/icons-material/Check';
 
 const AdminToolbar = () => {
     const { isAuthenticated, logout, isAdminMode, toggleAdminMode } = useAuth();
-    const { exportData, undo, redo, canUndo, canRedo } = useContent();
+    const { exportData, undo, redo, canUndo, canRedo, pendingChanges, executePendingChanges, autoSave } = useContent();
     const location = useLocation();
     const [isExpanded, setIsExpanded] = useState(false);
+    const [isSaving, setIsSaving] = useState(false);
+    const [saveSuccess, setSaveSuccess] = useState(false);
+
+    const handleSave = async () => {
+        setIsSaving(true);
+        await executePendingChanges();
+        setIsSaving(false);
+        setSaveSuccess(true);
+        setTimeout(() => setSaveSuccess(false), 2000);
+    };
+
+    const hasPending = !autoSave && pendingChanges && pendingChanges.length > 0;
 
     if (!isAuthenticated || location.pathname !== '/admin') return null;
 
@@ -87,6 +100,38 @@ const AdminToolbar = () => {
                             title="Redo"
                         >
                             <RedoIcon fontSize="small" />
+                        </button>
+
+                        <button
+                            onClick={handleSave}
+                            disabled={(!hasPending && !isSaving && !saveSuccess)}
+                            className={`relative flex items-center justify-center w-10 h-10 rounded-full transition-colors ${saveSuccess ? 'bg-green-500 text-white' : hasPending ? 'bg-indigo-500/10 text-indigo-400 hover:bg-indigo-500 hover:text-white' : 'bg-gray-800/20 text-gray-600 cursor-not-allowed'}`}
+                            title="Save to Database"
+                        >
+                            {isSaving ? (
+                                <motion.div
+                                    animate={{ rotate: 360 }}
+                                    transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
+                                    className="flex items-center justify-center"
+                                >
+                                    <SaveIcon fontSize="small" />
+                                </motion.div>
+                            ) : saveSuccess ? (
+                                <motion.div
+                                    initial={{ scale: 0 }}
+                                    animate={{ scale: 1 }}
+                                    className="flex items-center justify-center"
+                                >
+                                    <CheckIcon fontSize="small" />
+                                </motion.div>
+                            ) : (
+                                <>
+                                    <SaveIcon fontSize="small" />
+                                    {hasPending && (
+                                        <span className="absolute top-0 right-0 w-3 h-3 bg-red-500 border-2 border-gray-900 dark:border-white rounded-full"></span>
+                                    )}
+                                </>
+                            )}
                         </button>
 
                         <div className="w-px h-4 bg-gray-600 dark:bg-gray-300 opacity-50" />

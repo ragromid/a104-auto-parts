@@ -70,6 +70,7 @@ const ProductCard = memo(({ product, onSelect }) => {
                         <EditableText
                             value={product.name}
                             onSave={(val) => updateProduct(product.id, 'name', val)}
+                            rich={true}
                         />
                     </h3>
                 </div>
@@ -79,6 +80,8 @@ const ProductCard = memo(({ product, onSelect }) => {
                         <EditableText
                             value={product.info || 'No details'}
                             onSave={(val) => updateProduct(product.id, 'info', val)}
+                            rich={true}
+                            multiline={true}
                         />
                     </div>
 

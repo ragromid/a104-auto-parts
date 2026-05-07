@@ -9,10 +9,14 @@ import LightModeIcon from '@mui/icons-material/LightMode';
 import LanguageIcon from '@mui/icons-material/Language';
 import CategoryManager from './CategoryManager';
 import CategoryIcon from '@mui/icons-material/Category';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import SaveIcon from '@mui/icons-material/Save';
+import { useContent } from '../context/ContentContext';
 
 const SettingsModal = ({ isOpen, onClose, darkMode, toggleDarkMode }) => {
     const { t, i18n } = useTranslation();
     const { isAdminMode } = useAuth();
+    const { autoSave, toggleAutoSave } = useContent();
     const navigate = useNavigate();
     const [isCatManagerOpen, setIsCatManagerOpen] = React.useState(false);
 
@@ -123,6 +127,30 @@ const SettingsModal = ({ isOpen, onClose, darkMode, toggleDarkMode }) => {
                                         </div>
                                     </div>
                                     <ChevronRightIcon className="text-gray-400" />
+                                </div>
+                            )}
+
+                            {/* Auto-Save Toggle (Admin Only) */}
+                            {isAdminMode && (
+                                <div
+                                    onClick={() => toggleAutoSave(!autoSave)}
+                                    className="flex items-center justify-between p-4 rounded-2xl bg-gray-50 dark:bg-white/5 cursor-pointer hover:bg-gray-100 dark:hover:bg-white/10 transition-colors"
+                                >
+                                    <div className="flex items-center gap-3">
+                                        <div className={`w-10 h-10 rounded-full flex items-center justify-center ${autoSave ? 'bg-indigo-500/20 text-indigo-400' : 'bg-gray-500/20 text-gray-500'}`}>
+                                            <SaveIcon />
+                                        </div>
+                                        <div>
+                                            <p className="font-medium text-gray-900 dark:text-gray-100">Auto-Save</p>
+                                            <p className="text-xs text-gray-500 dark:text-gray-400">Save changes to DB immediately</p>
+                                        </div>
+                                    </div>
+                                    <div className={`w-12 h-7 rounded-full p-1 transition-colors ${autoSave ? 'bg-indigo-500' : 'bg-gray-300'}`}>
+                                        <motion.div
+                                            animate={{ x: autoSave ? 20 : 0 }}
+                                            className="w-5 h-5 bg-white rounded-full shadow-sm"
+                                        />
+                                    </div>
                                 </div>
                             )}
 

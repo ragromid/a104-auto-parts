@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import RichTextEditor from './RichTextEditor';
+import CheckIcon from '@mui/icons-material/Check';
 
-const EditableText = ({ value, onSave, className = '', tag = 'span', multiline = false }) => {
+const EditableText = ({ value, onSave, className = '', tag = 'span', multiline = false, rich = false }) => {
     const { isAdminMode } = useAuth();
     const [isEditing, setIsEditing] = useState(false);
     const [tempValue, setTempValue] = useState(value);
@@ -36,10 +38,30 @@ const EditableText = ({ value, onSave, className = '', tag = 'span', multiline =
 
     if (!isAdminMode) {
         const Tag = tag;
-        return <Tag className={className}>{value}</Tag>;
+        return rich ? <Tag className={className} dangerouslySetInnerHTML={{ __html: value }} /> : <Tag className={className}>{value}</Tag>;
     }
 
     if (isEditing) {
+        if (rich) {
+            return (
+                <div className="relative w-full z-50 bg-black/80 p-3 rounded-xl border border-white/20 shadow-2xl backdrop-blur-md mb-4">
+                    <RichTextEditor
+                        value={tempValue}
+                        onChange={setTempValue}
+                        className={`bg-white/5 border-white/10 ${className}`}
+                    />
+                    <div className="flex justify-end mt-2">
+                        <button
+                            onClick={handleSave}
+                            className="bg-green-500 hover:bg-green-600 text-white px-4 py-1.5 rounded-lg flex items-center gap-2 shadow-lg transition-colors text-sm font-medium"
+                        >
+                            <CheckIcon fontSize="small" /> Save
+                        </button>
+                    </div>
+                </div>
+            );
+        }
+
         return multiline ? (
             <textarea
                 ref={inputRef}
@@ -63,7 +85,17 @@ const EditableText = ({ value, onSave, className = '', tag = 'span', multiline =
     }
 
     const Tag = tag;
-    return (
+    return rich ? (
+        <Tag
+            onClick={(e) => {
+                e.stopPropagation();
+                setIsEditing(true);
+            }}
+            className={`${className} cursor-pointer hover:bg-yellow-100/20 dark:hover:bg-yellow-500/20 hover:outline hover:outline-2 hover:outline-dashed hover:outline-yellow-400 rounded transition-all duration-200 relative`}
+            title="Click to edit (Rich Text)"
+            dangerouslySetInnerHTML={{ __html: value }}
+        />
+    ) : (
         <Tag
             onClick={(e) => {
                 e.stopPropagation();

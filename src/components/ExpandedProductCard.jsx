@@ -190,6 +190,7 @@ const ExpandedProductCard = ({ product, onClose, layoutId }) => {
                             <EditableText
                                 value={product.name}
                                 onSave={(val) => updateProduct(product.id, 'name', val)}
+                                rich={true}
                             />
                         </h2>
 
@@ -207,6 +208,7 @@ const ExpandedProductCard = ({ product, onClose, layoutId }) => {
                                 value={product.info || 'No details'}
                                 onSave={(val) => updateProduct(product.id, 'info', val)}
                                 multiline
+                                rich={true}
                             />
                         </div>
                     </div>

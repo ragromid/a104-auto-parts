@@ -28,6 +28,7 @@ const AboutUs = () => {
                                 onSave={(val) => updateSiteSetting('aboutTitle', val)}
                                 className="text-sm font-bold uppercase tracking-widest"
                                 tag="span"
+                                rich={true}
                             />
                         </div>
                         <h2 className="text-3xl md:text-5xl font-light tracking-tight text-gray-900 dark:text-white mb-6">
@@ -35,6 +36,7 @@ const AboutUs = () => {
                                 value={siteSettings?.aboutHeading || t('ui.aboutUsHeading', 'Premium Quality Auto Parts for Your Vehicle.')}
                                 onSave={(val) => updateSiteSetting('aboutHeading', val)}
                                 tag="span"
+                                rich={true}
                             />
                         </h2>
                         <EditableText
@@ -43,6 +45,7 @@ const AboutUs = () => {
                             className="text-gray-600 dark:text-gray-400 leading-relaxed text-lg max-w-2xl block"
                             tag="p"
                             multiline={true}
+                            rich={true}
                         />
                     </div>
                     <div className="w-full md:w-1/3 aspect-video md:aspect-square bg-gray-100 dark:bg-white/5 rounded-3xl overflow-hidden relative group">

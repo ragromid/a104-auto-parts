@@ -42,7 +42,36 @@ const defaultSiteSettings = {
     aboutTitle: 'About KNK AVTO',
     aboutHeading: 'Premium Quality Auto Parts for Your Vehicle.',
     aboutDescription: 'KNK AVTO (a104.az) is your trusted destination for high-performance automotive components. We specialize in sourcing and providing top-tier products from world-renowned brands like NGK, Brembo, and Castrol, ensuring your vehicle performs at its peak.',
-    aboutImage: 'https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?q=80&w=800&auto=format&fit=crop'
+    aboutImage: 'https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?q=80&w=800&auto=format&fit=crop',
+    heroSlides: [
+        {
+            id: '1',
+            title: 'Experience a104.',
+            buttonText: 'Shop Now',
+            image: '',
+            glow1: 'bg-primary/40',
+            glow2: 'bg-secondary/30',
+            bg: 'bg-black dark:bg-white/5',
+        },
+        {
+            id: '2',
+            title: 'Premium Quality Parts.',
+            buttonText: 'Shop Now',
+            image: '',
+            glow1: 'bg-blue-500/40',
+            glow2: 'bg-purple-500/30',
+            bg: 'bg-zinc-900',
+        },
+        {
+            id: '3',
+            title: 'Unleash Performance.',
+            buttonText: 'Shop Now',
+            image: '',
+            glow1: 'bg-red-500/40',
+            glow2: 'bg-orange-500/30',
+            bg: 'bg-gray-900',
+        }
+    ]
 };
 
 const ContentContext = createContext();
@@ -201,17 +230,54 @@ export const ContentProvider = ({ children }) => {
         });
 
         if (useDb) {
-            try {
-                const { error } = await supabase
-                    .from('site_settings')
-                    .upsert({ id: 'global', [key]: value });
-                if (error) console.log("DB settings sync failed (table might not exist):", error.message);
-            } catch (e) { }
+            queueDbOperation(async () => {
+                try {
+                    const { error } = await supabase
+                        .from('site_settings')
+                        .upsert({ id: 'global', [key]: value });
+                    if (error) console.log("DB settings sync failed (table might not exist):", error.message);
+                } catch (e) { }
+            });
         }
     };
 
     const [past, setPast] = useState([]);
     const [future, setFuture] = useState([]);
+    
+    // Auto-Save and Pending Changes
+    const [autoSave, setAutoSave] = useState(() => {
+        const saved = localStorage.getItem('site_auto_save');
+        return saved ? JSON.parse(saved) : false;
+    });
+    const [pendingChanges, setPendingChanges] = useState([]);
+
+    const toggleAutoSave = (val) => {
+        setAutoSave(val);
+        localStorage.setItem('site_auto_save', JSON.stringify(val));
+        if (val) executePendingChanges();
+    };
+
+    const executePendingChanges = async () => {
+        if (pendingChanges.length === 0) return;
+        
+        // Execute all pending changes sequentially
+        for (const op of pendingChanges) {
+            try {
+                await op();
+            } catch (e) {
+                console.error("Pending change execution failed:", e);
+            }
+        }
+        setPendingChanges([]);
+    };
+
+    const queueDbOperation = async (op) => {
+        if (autoSave) {
+            await op();
+        } else {
+            setPendingChanges(prev => [...prev, op]);
+        }
+    };
 
     const saveSnapshot = () => {
         setPast(prev => [...prev, { products, categories, siteSettings }]);
@@ -260,11 +326,13 @@ export const ContentProvider = ({ children }) => {
         setProducts(prev => prev.map(p => p.id === id ? { ...p, [field]: value } : p));
 
         if (useDb) {
-            const { error } = await supabase
-                .from('products')
-                .update({ [field]: value })
-                .eq('id', id);
-            if (error) console.error("DB Update Failed", error);
+            queueDbOperation(async () => {
+                const { error } = await supabase
+                    .from('products')
+                    .update({ [field]: value })
+                    .eq('id', id);
+                if (error) console.error("DB Update Failed", error);
+            });
         }
     };
 
@@ -283,10 +351,12 @@ export const ContentProvider = ({ children }) => {
         setProducts(prev => [productWithId, ...prev]);
 
         if (useDb) {
-            const { error } = await supabase
-                .from('products')
-                .insert([productWithId]);
-            if (error) console.error("DB Add Failed", error);
+            queueDbOperation(async () => {
+                const { error } = await supabase
+                    .from('products')
+                    .insert([productWithId]);
+                if (error) console.error("DB Add Failed", error);
+            });
         }
 
         return productWithId;
@@ -300,14 +370,16 @@ export const ContentProvider = ({ children }) => {
         setProducts(prev => prev.filter(p => p.id !== id));
 
         if (useDb) {
-            if (imageUrl) {
-                await deleteImageFromStorage(imageUrl);
-            }
-            const { error } = await supabase
-                .from('products')
-                .delete()
-                .eq('id', id);
-            if (error) console.error("DB Delete Failed", error);
+            queueDbOperation(async () => {
+                if (imageUrl) {
+                    await deleteImageFromStorage(imageUrl);
+                }
+                const { error } = await supabase
+                    .from('products')
+                    .delete()
+                    .eq('id', id);
+                if (error) console.error("DB Delete Failed", error);
+            });
         }
     };
 
@@ -327,22 +399,24 @@ export const ContentProvider = ({ children }) => {
         setCategories(prev => updateRecursive(prev));
 
         if (useDb) {
-            try {
-                const { error: selfErr } = await supabase
-                    .from('categories')
-                    .update({ id: newName, name: newName })
-                    .eq('id', id);
+            queueDbOperation(async () => {
+                try {
+                    const { error: selfErr } = await supabase
+                        .from('categories')
+                        .update({ id: newName, name: newName })
+                        .eq('id', id);
 
-                if (selfErr) {
-                    console.error("DB Category Rename Failed", selfErr);
-                    return;
+                    if (selfErr) {
+                        console.error("DB Category Rename Failed", selfErr);
+                        return;
+                    }
+
+                    await supabase.from('categories').update({ parent_id: newName }).eq('parent_id', id);
+                    await supabase.from('products').update({ category: newName }).eq('category', id);
+                } catch (err) {
+                    console.error("Critical Cascade Failure:", err);
                 }
-
-                await supabase.from('categories').update({ parent_id: newName }).eq('parent_id', id);
-                await supabase.from('products').update({ category: newName }).eq('category', id);
-            } catch (err) {
-                console.error("Critical Cascade Failure:", err);
-            }
+            });
         }
     };
 
@@ -373,10 +447,12 @@ export const ContentProvider = ({ children }) => {
         }
 
         if (useDb) {
-            const { error } = await supabase
-                .from('categories')
-                .insert([{ id, name, parent_id: safeParentId }]);
-            if (error) console.error("DB Add Category Failed", error);
+            queueDbOperation(async () => {
+                const { error } = await supabase
+                    .from('categories')
+                    .insert([{ id, name, parent_id: safeParentId }]);
+                if (error) console.error("DB Add Category Failed", error);
+            });
         }
     };
 
@@ -393,11 +469,13 @@ export const ContentProvider = ({ children }) => {
         setCategories(prev => deleteRecursive(prev));
 
         if (useDb) {
-            const { error } = await supabase
-                .from('categories')
-                .delete()
-                .eq('id', id);
-            if (error) console.error("DB Delete Category Failed", error);
+            queueDbOperation(async () => {
+                const { error } = await supabase
+                    .from('categories')
+                    .delete()
+                    .eq('id', id);
+                if (error) console.error("DB Delete Category Failed", error);
+            });
         }
     };
 
@@ -465,7 +543,11 @@ export const ContentProvider = ({ children }) => {
             undo,
             redo,
             canUndo,
-            canRedo
+            canRedo,
+            autoSave,
+            toggleAutoSave,
+            pendingChanges,
+            executePendingChanges
         }}>
             {children}
         </ContentContext.Provider>

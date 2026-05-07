@@ -16,6 +16,7 @@ import { CartProvider } from './context/CartContext';
 import { AuthProvider } from './context/AuthContext';
 import { ContentProvider } from './context/ContentContext';
 import ExpandedProductCard from './components/ExpandedProductCard';
+import HeroCarousel from './components/HeroCarousel';
 import AddIcon from '@mui/icons-material/Add';
 import { fetchAndStoreImage } from './lib/imagePersistence';
 import Pagination from './components/Pagination';
@@ -245,8 +246,9 @@ function AppContent() {
         matchesCategory = validCategories.includes(product.category);
       }
 
-      const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        product.sku.toLowerCase().includes(searchTerm.toLowerCase());
+      const plainName = product.name ? product.name.replace(/<[^>]*>?/gm, '').toLowerCase() : '';
+      const matchesSearch = plainName.includes(searchTerm.toLowerCase()) ||
+        (product.sku && product.sku.toLowerCase().includes(searchTerm.toLowerCase()));
       return matchesCategory && matchesSearch;
     });
   }, [products, activeCategory, searchTerm]);
@@ -388,42 +390,12 @@ function AppContent() {
                   </motion.div>
 
                   {/* Hero Section */}
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1], delay: 0.3 }}
-                    className="px-4 sm:px-6 lg:px-8 py-4 sm:py-6"
-                  >
-                    <div className="rounded-2xl sm:rounded-3xl p-6 sm:p-12 relative overflow-hidden bg-black dark:bg-white/5 text-white shadow-2xl dark:shadow-none min-h-[300px] sm:min-h-[400px] flex flex-col justify-center">
-                      <div className="relative z-10 max-w-lg">
-                        <motion.h2
-                          initial={{ y: 20, opacity: 0 }}
-                          animate={{ y: 0, opacity: 1 }}
-                          transition={{ delay: 0.5, duration: 0.8 }}
-                          className="text-3xl sm:text-6xl font-light mb-3 sm:mb-4 tracking-tighter"
-                        >
-                          {t('ui.experience')} <span className="font-bold text-secondary">a104</span>.
-                        </motion.h2>
-                        <motion.button
-                          initial={{ y: 20, opacity: 0 }}
-                          animate={{ y: 0, opacity: 1 }}
-                          transition={{ delay: 0.9, duration: 0.8 }}
-                          onClick={() => {
-                            const grid = document.getElementById('product-grid');
-                            if (grid) grid.scrollIntoView({ behavior: 'smooth' });
-                          }}
-                          className="bg-white text-black hover:bg-secondary hover:text-white font-medium py-2.5 px-8 sm:py-3 sm:px-10 rounded-full transition-all duration-300 text-sm sm:text-base shadow-lg shadow-white/20 hover:shadow-secondary/20"
-                        >
-                          {t('ui.shopNow')}
-                        </motion.button>
-                      </div>
-                      {/* Background Glows (Hidden on smaller screens to save mobile GPU) */}
-                      <div className="absolute right-0 top-0 h-full w-1/2 opacity-20 pointer-events-none hidden sm:block">
-                        <div className="absolute top-1/2 left-1/2 w-96 h-96 bg-primary/40 rounded-full blur-[100px] -translate-x-1/2 -translate-y-1/2 animate-pulse-slow"></div>
-                        <div className="absolute top-0 right-0 w-80 h-80 bg-secondary/30 rounded-full blur-[80px]"></div>
-                      </div>
-                    </div>
-                  </motion.div>
+                  <HeroCarousel 
+                    onShopNow={() => {
+                      const grid = document.getElementById('product-grid');
+                      if (grid) grid.scrollIntoView({ behavior: 'smooth' });
+                    }} 
+                  />
                 </>
               )}
 
