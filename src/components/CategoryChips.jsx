@@ -343,7 +343,7 @@ const CategoryChips = ({ activeCategory, onSelectCategory, onOpenSheet }) => {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        className="absolute left-0 top-0 bottom-0 z-20 flex items-center pr-8 pl-1 bg-gradient-to-r from-background via-background/90 dark:from-background-dark dark:via-background-dark/90 to-transparent pointer-events-none"
+                        className="absolute left-0 top-0 bottom-0 z-30 flex items-center pr-8 pl-1 bg-gradient-to-r from-background via-background/90 dark:from-background-dark dark:via-background-dark/90 to-transparent pointer-events-none"
                     >
                         <button
                             type="button"
@@ -364,7 +364,7 @@ const CategoryChips = ({ activeCategory, onSelectCategory, onOpenSheet }) => {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        className="absolute right-0 top-0 bottom-0 z-20 flex items-center pl-8 pr-1 bg-gradient-to-l from-background via-background/90 dark:from-background-dark dark:via-background-dark/90 to-transparent pointer-events-none"
+                        className="absolute right-0 top-0 bottom-0 z-30 flex items-center pl-8 pr-1 bg-gradient-to-l from-background via-background/90 dark:from-background-dark dark:via-background-dark/90 to-transparent pointer-events-none"
                     >
                         <button
                             type="button"

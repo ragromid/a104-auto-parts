@@ -97,9 +97,14 @@ const HeroCarousel = ({ onShopNow }) => {
             transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1], delay: 0.3 }}
             className="px-4 sm:px-6 lg:px-8 py-4 sm:py-6 relative"
         >
-            {/* Admin Toolbar */}
+        <div 
+            className="rounded-2xl sm:rounded-3xl relative overflow-hidden shadow-2xl dark:shadow-none min-h-[300px] sm:min-h-[400px] group"
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
+        >
+            {/* Admin Toolbar Scoped Inside Carousel Card */}
             {isAdminMode && (
-                <div className="absolute top-8 right-12 z-50 flex gap-2">
+                <div className="absolute top-4 right-4 z-30 flex gap-2">
                     <button
                         onClick={handleAddSlide}
                         className="bg-green-500 hover:bg-green-600 text-white p-2 rounded-full shadow-lg transition-colors flex items-center justify-center w-10 h-10"
@@ -134,12 +139,6 @@ const HeroCarousel = ({ onShopNow }) => {
                     )}
                 </div>
             )}
-
-            <div 
-                className="rounded-2xl sm:rounded-3xl relative overflow-hidden shadow-2xl dark:shadow-none min-h-[300px] sm:min-h-[400px] group"
-                onMouseEnter={() => setIsHovered(true)}
-                onMouseLeave={() => setIsHovered(false)}
-            >
                 <AnimatePresence mode="wait">
                     <motion.div
                         key={slides[currentSlide].id} // use unique id here to trigger animation correctly
