@@ -1,10 +1,12 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import GridViewIcon from '@mui/icons-material/GridView';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import AddIcon from '@mui/icons-material/Add';
 import CloseIcon from '@mui/icons-material/Close';
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useContent } from '../context/ContentContext';
 import { useAuth } from '../context/AuthContext';
@@ -39,7 +41,8 @@ const SortableChip = ({
     addSub,
     deleteCat,
     t,
-    isTouch
+    isTouch,
+    isDraggingScroll
 }) => {
 
     const {
@@ -59,15 +62,34 @@ const SortableChip = ({
     };
 
     const hasChildren = category.children && category.children.length > 0;
+    const chipRef = useRef(null);
+
+    // Auto-scroll active chip into view
+    useEffect(() => {
+        if (isActive && chipRef.current) {
+            chipRef.current.scrollIntoView({
+                behavior: 'smooth',
+                block: 'nearest',
+                inline: 'center'
+            });
+        }
+    }, [isActive]);
 
     return (
         <motion.div
-            ref={setNodeRef}
+            ref={(node) => {
+                setNodeRef(node);
+                chipRef.current = node;
+            }}
             style={style}
             whileHover={!isTouch && !isDragging ? { scale: 1.02, y: -2 } : {}}
             whileTap={!isDragging ? { scale: 0.98 } : {}}
             transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-            onClick={() => !isDragging && onSelect(category)}
+            onClick={(e) => {
+                if (!isDragging && !isDraggingScroll) {
+                    onSelect(category);
+                }
+            }}
             className={`relative px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 snap-start flex-shrink-0 flex items-center gap-2 cursor-pointer select-none group
             ${isActive
                     ? 'text-white dark:text-gray-900 shadow-lg'
@@ -143,6 +165,16 @@ const CategoryChips = ({ activeCategory, onSelectCategory }) => {
 
     const sliderRef = useRef(null);
 
+    // Scroll buttons & indicator state
+    const [canScrollLeft, setCanScrollLeft] = useState(false);
+    const [canScrollRight, setCanScrollRight] = useState(false);
+
+    // Mouse drag scrolling state
+    const isMouseDown = useRef(false);
+    const startX = useRef(0);
+    const scrollLeftStart = useRef(0);
+    const [isDraggingScroll, setIsDraggingScroll] = useState(false);
+
     const sensors = useSensors(
         useSensor(PointerSensor, {
             activationConstraint: { distance: 8 }
@@ -151,6 +183,76 @@ const CategoryChips = ({ activeCategory, onSelectCategory }) => {
             coordinateGetter: sortableKeyboardCoordinates
         })
     );
+
+    const updateScrollButtons = useCallback(() => {
+        if (sliderRef.current) {
+            const { scrollLeft, scrollWidth, clientWidth } = sliderRef.current;
+            setCanScrollLeft(scrollLeft > 5);
+            setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 5);
+        }
+    }, []);
+
+    useEffect(() => {
+        const slider = sliderRef.current;
+        if (!slider) return;
+
+        updateScrollButtons();
+        slider.addEventListener('scroll', updateScrollButtons, { passive: true });
+        window.addEventListener('resize', updateScrollButtons);
+
+        return () => {
+            slider.removeEventListener('scroll', updateScrollButtons);
+            window.removeEventListener('resize', updateScrollButtons);
+        };
+    }, [currentLevel, updateScrollButtons]);
+
+    // Handle mouse wheel horizontal scrolling
+    useEffect(() => {
+        const slider = sliderRef.current;
+        if (!slider) return;
+
+        const handleWheel = (e) => {
+            if (e.deltaY !== 0) {
+                if (slider.scrollWidth > slider.clientWidth) {
+                    e.preventDefault();
+                    slider.scrollLeft += e.deltaY;
+                }
+            }
+        };
+
+        slider.addEventListener('wheel', handleWheel, { passive: false });
+        return () => slider.removeEventListener('wheel', handleWheel);
+    }, []);
+
+    // Drag-to-scroll mouse handlers
+    const handleMouseDown = (e) => {
+        if (e.button !== 0 || isAdminMode) return;
+        isMouseDown.current = true;
+        startX.current = e.pageX - sliderRef.current.offsetLeft;
+        scrollLeftStart.current = sliderRef.current.scrollLeft;
+        setIsDraggingScroll(false);
+    };
+
+    const handleMouseMove = (e) => {
+        if (!isMouseDown.current || !sliderRef.current) return;
+        const x = e.pageX - sliderRef.current.offsetLeft;
+        const walk = (x - startX.current) * 1.5;
+        if (Math.abs(x - startX.current) > 5) {
+            setIsDraggingScroll(true);
+            sliderRef.current.scrollLeft = scrollLeftStart.current - walk;
+        }
+    };
+
+    const handleMouseUpOrLeave = () => {
+        isMouseDown.current = false;
+        setTimeout(() => setIsDraggingScroll(false), 50);
+    };
+
+    const scrollByAmount = (offset) => {
+        if (sliderRef.current) {
+            sliderRef.current.scrollBy({ left: offset, behavior: 'smooth' });
+        }
+    };
 
     const findCategory = (id, list) => {
         for (const cat of list) {
@@ -175,6 +277,7 @@ const CategoryChips = ({ activeCategory, onSelectCategory }) => {
     }, [categories, viewParentId]);
 
     const handleCategoryClick = (category) => {
+        if (isDraggingScroll) return;
         const hasChildren = category.children && category.children.length > 0;
         if (hasChildren || isAdminMode) {
             setHistory([...history, { list: currentLevel, parentId: viewParentId }]);
@@ -214,6 +317,7 @@ const CategoryChips = ({ activeCategory, onSelectCategory }) => {
     };
 
     const handleAllClick = () => {
+        if (isDraggingScroll) return;
         setHistory([]);
         setCurrentLevel(categories);
         setViewParentId(null);
@@ -221,7 +325,49 @@ const CategoryChips = ({ activeCategory, onSelectCategory }) => {
     };
 
     return (
-        <div className="w-full overflow-hidden">
+        <div className="relative w-full overflow-hidden group">
+            {/* Left Scroll Button & Gradient Overlay */}
+            <AnimatePresence>
+                {canScrollLeft && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="absolute left-0 top-0 bottom-0 z-20 flex items-center pr-8 pl-1 bg-gradient-to-r from-background via-background/80 dark:from-background-dark dark:via-background-dark/80 to-transparent pointer-events-none"
+                    >
+                        <button
+                            type="button"
+                            onClick={() => scrollByAmount(-260)}
+                            className="pointer-events-auto flex items-center justify-center w-8 h-8 rounded-full bg-white/90 dark:bg-zinc-800/90 text-gray-700 dark:text-gray-200 shadow-md border border-gray-200/50 dark:border-white/10 hover:scale-110 hover:bg-white dark:hover:bg-zinc-700 active:scale-95 transition-all"
+                            aria-label="Scroll left"
+                        >
+                            <ChevronLeftIcon fontSize="small" />
+                        </button>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* Right Scroll Button & Gradient Overlay */}
+            <AnimatePresence>
+                {canScrollRight && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="absolute right-0 top-0 bottom-0 z-20 flex items-center pl-8 pr-1 bg-gradient-to-l from-background via-background/80 dark:from-background-dark dark:via-background-dark/80 to-transparent pointer-events-none"
+                    >
+                        <button
+                            type="button"
+                            onClick={() => scrollByAmount(260)}
+                            className="pointer-events-auto flex items-center justify-center w-8 h-8 rounded-full bg-white/90 dark:bg-zinc-800/90 text-gray-700 dark:text-gray-200 shadow-md border border-gray-200/50 dark:border-white/10 hover:scale-110 hover:bg-white dark:hover:bg-zinc-700 active:scale-95 transition-all"
+                            aria-label="Scroll right"
+                        >
+                            <ChevronRightIcon fontSize="small" />
+                        </button>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
             <DndContext
                 sensors={sensors}
                 collisionDetection={closestCorners}
@@ -230,7 +376,12 @@ const CategoryChips = ({ activeCategory, onSelectCategory }) => {
             >
                 <motion.div
                     ref={sliderRef}
-                    className="w-full py-3 px-4 overflow-x-auto no-scrollbar"
+                    onMouseDown={handleMouseDown}
+                    onMouseMove={handleMouseMove}
+                    onMouseUp={handleMouseUpOrLeave}
+                    onMouseLeave={handleMouseUpOrLeave}
+                    className="w-full py-3 px-4 overflow-x-auto no-scrollbar scroll-smooth cursor-grab active:cursor-grabbing select-none"
+                    style={{ touchAction: 'pan-x' }}
                 >
                     <div className="flex flex-nowrap space-x-3 w-max items-center">
                         <AnimatePresence mode="popLayout">
@@ -287,6 +438,7 @@ const CategoryChips = ({ activeCategory, onSelectCategory }) => {
                                     deleteCat={deleteCategory}
                                     t={t}
                                     isTouch={isTouch}
+                                    isDraggingScroll={isDraggingScroll}
                                 />
                             ))}
                         </SortableContext>
