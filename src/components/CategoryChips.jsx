@@ -44,7 +44,6 @@ const SortableChip = ({
     isTouch,
     isDraggingScroll
 }) => {
-
     const {
         attributes,
         listeners,
@@ -64,7 +63,7 @@ const SortableChip = ({
     const hasChildren = category.children && category.children.length > 0;
     const chipRef = useRef(null);
 
-    // Auto-scroll active chip into view
+    // Auto-scroll active chip into view when active
     useEffect(() => {
         if (isActive && chipRef.current) {
             chipRef.current.scrollIntoView({
@@ -85,7 +84,7 @@ const SortableChip = ({
             whileHover={!isTouch && !isDragging ? { scale: 1.02, y: -2 } : {}}
             whileTap={!isDragging ? { scale: 0.98 } : {}}
             transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-            onClick={(e) => {
+            onClick={() => {
                 if (!isDragging && !isDraggingScroll) {
                     onSelect(category);
                 }
@@ -151,7 +150,7 @@ const SortableChip = ({
     );
 };
 
-const CategoryChips = ({ activeCategory, onSelectCategory }) => {
+const CategoryChips = ({ activeCategory, onSelectCategory, onOpenSheet }) => {
     const { t } = useTranslation();
     const { categories, updateCategoryName, addCategory, deleteCategory, moveCategory } = useContent();
     const { isAdminMode } = useAuth();
@@ -192,21 +191,31 @@ const CategoryChips = ({ activeCategory, onSelectCategory }) => {
         }
     }, []);
 
+    // Observer and scroll events for dynamic arrow display
     useEffect(() => {
         const slider = sliderRef.current;
         if (!slider) return;
 
         updateScrollButtons();
+
+        const resizeObserver = new ResizeObserver(() => {
+            updateScrollButtons();
+        });
+
+        resizeObserver.observe(slider);
+        if (slider.firstElementChild) {
+            resizeObserver.observe(slider.firstElementChild);
+        }
+
         slider.addEventListener('scroll', updateScrollButtons, { passive: true });
-        window.addEventListener('resize', updateScrollButtons);
 
         return () => {
+            resizeObserver.disconnect();
             slider.removeEventListener('scroll', updateScrollButtons);
-            window.removeEventListener('resize', updateScrollButtons);
         };
     }, [currentLevel, updateScrollButtons]);
 
-    // Handle mouse wheel horizontal scrolling
+    // Handle mouse wheel vertical-to-horizontal scrolling (bypass Lenis)
     useEffect(() => {
         const slider = sliderRef.current;
         if (!slider) return;
@@ -215,6 +224,7 @@ const CategoryChips = ({ activeCategory, onSelectCategory }) => {
             if (e.deltaY !== 0) {
                 if (slider.scrollWidth > slider.clientWidth) {
                     e.preventDefault();
+                    e.stopPropagation();
                     slider.scrollLeft += e.deltaY;
                 }
             }
@@ -224,7 +234,7 @@ const CategoryChips = ({ activeCategory, onSelectCategory }) => {
         return () => slider.removeEventListener('wheel', handleWheel);
     }, []);
 
-    // Drag-to-scroll mouse handlers
+    // Mouse drag-to-scroll handlers for desktop
     const handleMouseDown = (e) => {
         if (e.button !== 0 || isAdminMode) return;
         isMouseDown.current = true;
@@ -325,20 +335,20 @@ const CategoryChips = ({ activeCategory, onSelectCategory }) => {
     };
 
     return (
-        <div className="relative w-full overflow-hidden group">
-            {/* Left Scroll Button & Gradient Overlay */}
+        <div data-lenis-prevent className="relative w-full overflow-hidden group">
+            {/* Left Scroll Arrow & Soft Fade Overlay */}
             <AnimatePresence>
                 {canScrollLeft && (
                     <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        className="absolute left-0 top-0 bottom-0 z-20 flex items-center pr-8 pl-1 bg-gradient-to-r from-background via-background/80 dark:from-background-dark dark:via-background-dark/80 to-transparent pointer-events-none"
+                        className="absolute left-0 top-0 bottom-0 z-20 flex items-center pr-8 pl-1 bg-gradient-to-r from-background via-background/90 dark:from-background-dark dark:via-background-dark/90 to-transparent pointer-events-none"
                     >
                         <button
                             type="button"
-                            onClick={() => scrollByAmount(-260)}
-                            className="pointer-events-auto flex items-center justify-center w-8 h-8 rounded-full bg-white/90 dark:bg-zinc-800/90 text-gray-700 dark:text-gray-200 shadow-md border border-gray-200/50 dark:border-white/10 hover:scale-110 hover:bg-white dark:hover:bg-zinc-700 active:scale-95 transition-all"
+                            onClick={() => scrollByAmount(-280)}
+                            className="pointer-events-auto flex items-center justify-center w-9 h-9 rounded-full bg-white dark:bg-zinc-800 text-gray-800 dark:text-gray-100 shadow-lg border border-gray-200 dark:border-zinc-700 hover:scale-110 hover:bg-gray-50 dark:hover:bg-zinc-700 active:scale-95 transition-all"
                             aria-label="Scroll left"
                         >
                             <ChevronLeftIcon fontSize="small" />
@@ -347,19 +357,19 @@ const CategoryChips = ({ activeCategory, onSelectCategory }) => {
                 )}
             </AnimatePresence>
 
-            {/* Right Scroll Button & Gradient Overlay */}
+            {/* Right Scroll Arrow & Soft Fade Overlay */}
             <AnimatePresence>
                 {canScrollRight && (
                     <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        className="absolute right-0 top-0 bottom-0 z-20 flex items-center pl-8 pr-1 bg-gradient-to-l from-background via-background/80 dark:from-background-dark dark:via-background-dark/80 to-transparent pointer-events-none"
+                        className="absolute right-0 top-0 bottom-0 z-20 flex items-center pl-8 pr-1 bg-gradient-to-l from-background via-background/90 dark:from-background-dark dark:via-background-dark/90 to-transparent pointer-events-none"
                     >
                         <button
                             type="button"
-                            onClick={() => scrollByAmount(260)}
-                            className="pointer-events-auto flex items-center justify-center w-8 h-8 rounded-full bg-white/90 dark:bg-zinc-800/90 text-gray-700 dark:text-gray-200 shadow-md border border-gray-200/50 dark:border-white/10 hover:scale-110 hover:bg-white dark:hover:bg-zinc-700 active:scale-95 transition-all"
+                            onClick={() => scrollByAmount(280)}
+                            className="pointer-events-auto flex items-center justify-center w-9 h-9 rounded-full bg-white dark:bg-zinc-800 text-gray-800 dark:text-gray-100 shadow-lg border border-gray-200 dark:border-zinc-700 hover:scale-110 hover:bg-gray-50 dark:hover:bg-zinc-700 active:scale-95 transition-all"
                             aria-label="Scroll right"
                         >
                             <ChevronRightIcon fontSize="small" />
@@ -376,14 +386,17 @@ const CategoryChips = ({ activeCategory, onSelectCategory }) => {
             >
                 <motion.div
                     ref={sliderRef}
+                    data-lenis-prevent
+                    data-lenis-prevent-wheel
+                    data-lenis-prevent-touch
                     onMouseDown={handleMouseDown}
                     onMouseMove={handleMouseMove}
                     onMouseUp={handleMouseUpOrLeave}
                     onMouseLeave={handleMouseUpOrLeave}
                     className="w-full py-3 px-4 overflow-x-auto no-scrollbar scroll-smooth cursor-grab active:cursor-grabbing select-none"
-                    style={{ touchAction: 'pan-x' }}
+                    style={{ touchAction: 'pan-x', WebkitOverflowScrolling: 'touch' }}
                 >
-                    <div className="flex flex-nowrap space-x-3 w-max items-center">
+                    <div className="flex flex-nowrap space-x-3 w-max items-center pr-4">
                         <AnimatePresence mode="popLayout">
                             {history.length > 0 && (
                                 <motion.button
@@ -449,6 +462,17 @@ const CategoryChips = ({ activeCategory, onSelectCategory }) => {
                                 className="flex items-center justify-center w-10 h-10 rounded-2xl bg-green-500/10 text-green-500 hover:bg-green-500 hover:text-white transition-all border border-green-500/20 flex-shrink-0"
                             >
                                 <AddIcon fontSize="small" />
+                            </button>
+                        )}
+
+                        {onOpenSheet && (
+                            <button
+                                onClick={onOpenSheet}
+                                className="flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-semibold bg-gray-200/60 dark:bg-zinc-800 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-zinc-700 transition-all flex-shrink-0 ml-1 shadow-sm"
+                                title={t('ui.viewAllCategories', 'All Categories')}
+                            >
+                                <GridViewIcon style={{ fontSize: 16 }} />
+                                <span className="hidden sm:inline">{t('filters.All', 'All')}</span>
                             </button>
                         )}
                     </div>

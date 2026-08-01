@@ -381,6 +381,7 @@ function AppContent() {
                     initial={{ opacity: 0, y: -20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.2, duration: 0.5 }}
+                    data-lenis-prevent
                     className="sticky top-[4rem] z-40 bg-background/95 dark:bg-background-dark/95 backdrop-blur-md pt-4 pb-2 transition-all duration-300">
                     <CategoryChips
                       activeCategory={activeCategory}
