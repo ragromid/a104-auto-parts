@@ -394,7 +394,7 @@ const CategoryChips = ({ activeCategory, onSelectCategory, onOpenSheet }) => {
                     onMouseUp={handleMouseUpOrLeave}
                     onMouseLeave={handleMouseUpOrLeave}
                     className="w-full py-3 px-4 overflow-x-auto no-scrollbar scroll-smooth cursor-grab active:cursor-grabbing select-none"
-                    style={{ touchAction: 'pan-x', WebkitOverflowScrolling: 'touch' }}
+                    style={{ touchAction: 'pan-x', WebkitOverflowScrolling: 'touch', overflowX: 'auto', msOverflowStyle: 'auto', scrollbarWidth: 'auto', minHeight: 64 }}
                 >
                     <div className="flex flex-nowrap space-x-3 w-max items-center pr-4">
                         <AnimatePresence mode="popLayout">
