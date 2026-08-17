@@ -197,7 +197,11 @@ export const ContentProvider = ({ children }) => {
                         .eq('id', 'global')
                         .single();
                     if (settingsData && !sErr) {
-                        setSiteSettings(prev => ({ ...prev, ...settingsData }));
+                        setSiteSettings(prev => {
+                            const next = { ...prev, ...settingsData };
+                            localStorage.setItem('site_settings', JSON.stringify(next));
+                            return next;
+                        });
                     }
                 } catch (e) {
                     // Ignore, table might not exist
@@ -247,7 +251,7 @@ export const ContentProvider = ({ children }) => {
     // Auto-Save and Pending Changes
     const [autoSave, setAutoSave] = useState(() => {
         const saved = localStorage.getItem('site_auto_save');
-        return saved ? JSON.parse(saved) : false;
+        return saved ? JSON.parse(saved) : true;
     });
     const [pendingChanges, setPendingChanges] = useState([]);
 
