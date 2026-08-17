@@ -32,7 +32,7 @@ const AdminToolbar = () => {
 
     const hasPending = !autoSave && pendingChanges && pendingChanges.length > 0;
 
-    if (!isAuthenticated || location.pathname !== '/admin') return null;
+    if (!isAuthenticated) return null;
 
     return (
         <motion.div
