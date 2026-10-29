@@ -281,21 +281,21 @@ const HeroCarousel = ({ onShopNow }) => {
                         transition={{ duration: 0.35, ease: "easeInOut" }}
                         className="absolute inset-0 text-white flex flex-col justify-center z-10 pointer-events-none"
                     >
-                        {/* Slide Background Image Layer (Anchored to the right: cuts from left, preserves right) */}
+                        {/* Slide Background Image Layer (Centered) */}
                         {isAdminMode ? (
                             <div className="absolute inset-0 z-0 pointer-events-auto">
                                 {adminImageMode === 'desktop' ? (
                                     <EditableImage
                                         src={currentDesktopImage}
                                         alt={`Hero Desktop Background ${currentSlide + 1}`}
-                                        className="w-full h-full object-cover object-right"
+                                        className="w-full h-full object-cover object-center"
                                         onSave={handleImageSave}
                                     />
                                 ) : (
                                     <EditableImage
                                         src={currentMobileImage}
                                         alt={`Hero Mobile Background ${currentSlide + 1}`}
-                                        className="w-full h-full object-cover object-right"
+                                        className="w-full h-full object-cover object-center"
                                         onSave={handleMobileImageSave}
                                     />
                                 )}
@@ -308,7 +308,7 @@ const HeroCarousel = ({ onShopNow }) => {
                                     <EditableImage
                                         src={currentDesktopImage}
                                         alt={`Hero Background ${currentSlide + 1}`}
-                                        className="w-full h-full object-cover object-right"
+                                        className="w-full h-full object-cover object-center"
                                         onSave={handleImageSave}
                                     />
                                 </div>
@@ -318,7 +318,7 @@ const HeroCarousel = ({ onShopNow }) => {
                                         <EditableImage
                                             src={currentMobileImage}
                                             alt={`Hero Mobile Background ${currentSlide + 1}`}
-                                            className="w-full h-full object-cover object-right"
+                                            className="w-full h-full object-cover object-center"
                                             onSave={handleMobileImageSave}
                                         />
                                     </div>
