@@ -46,21 +46,21 @@ const defaultSiteSettings = {
     heroSlides: [
         {
             id: '1',
-            title: 'Experience a104.',
+            title: '',
             buttonText: 'Shop Now',
-            image: '',
+            image: '/banner-knk-avto-centered.webp',
             glow1: 'bg-primary/40',
             glow2: 'bg-secondary/30',
-            bg: 'bg-black dark:bg-white/5',
+            bg: 'bg-white',
         },
         {
             id: '2',
-            title: 'Premium Quality Parts.',
+            title: '',
             buttonText: 'Shop Now',
-            image: '',
+            image: '/banner-brands-centered.webp',
             glow1: 'bg-blue-500/40',
             glow2: 'bg-purple-500/30',
-            bg: 'bg-zinc-900',
+            bg: 'bg-white',
         },
         {
             id: '3',
