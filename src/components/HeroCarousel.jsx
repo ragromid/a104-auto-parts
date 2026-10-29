@@ -12,6 +12,7 @@ import DesktopWindowsIcon from '@mui/icons-material/DesktopWindows';
 import { useAuth } from '../context/AuthContext';
 import { useContent } from '../context/ContentContext';
 import EditableImage from './editable/EditableImage';
+import CachedImage from './CachedImage';
 import RichTextEditor from './editable/RichTextEditor';
 
 const slideVariants = {
@@ -126,8 +127,8 @@ const HeroCarousel = ({ onShopNow }) => {
     };
 
     const handleEditStart = () => {
-        setEditTitle(slides[currentSlide].title);
-        setEditButtonText(slides[currentSlide].buttonText);
+        setEditTitle(slides[currentSlide].title || '');
+        setEditButtonText(slides[currentSlide].buttonText || '');
         setIsEditingText(true);
     };
 
@@ -171,6 +172,11 @@ const HeroCarousel = ({ onShopNow }) => {
 
     if (slides.length === 0) return null;
 
+    const currentSlideData = slides[currentSlide];
+    const currentDesktopImage = currentSlideData?.image || '';
+    const currentMobileImage = currentSlideData?.mobileImage || '';
+    const hasContent = Boolean(currentSlideData?.title || currentSlideData?.buttonText || isEditingText);
+
     return (
         <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
@@ -179,7 +185,7 @@ const HeroCarousel = ({ onShopNow }) => {
             className="px-4 sm:px-6 lg:px-8 py-3 sm:py-6 relative"
         >
             <div 
-                className="rounded-2xl sm:rounded-3xl relative overflow-hidden shadow-2xl dark:shadow-none h-[260px] xs:h-[300px] sm:h-[400px] md:h-[480px] lg:h-[520px] group touch-pan-y select-none"
+                className="rounded-2xl sm:rounded-3xl relative overflow-hidden shadow-2xl dark:shadow-none aspect-[16/9] sm:aspect-auto sm:h-[400px] md:h-[480px] lg:h-[520px] bg-black group touch-pan-y select-none"
                 onMouseEnter={() => setIsHovered(true)}
                 onMouseLeave={() => setIsHovered(false)}
                 onTouchStart={handleTouchStart}
@@ -248,11 +254,11 @@ const HeroCarousel = ({ onShopNow }) => {
                         >
                             <SmartphoneIcon sx={{ fontSize: 15 }} />
                             <span className="hidden xs:inline">Mobile</span>
-                            {slides[currentSlide].mobileImage && (
+                            {currentMobileImage && (
                                 <span className="w-1.5 h-1.5 rounded-full bg-green-400" title="Custom mobile image active" />
                             )}
                         </button>
-                        {adminImageMode === 'mobile' && slides[currentSlide].mobileImage && (
+                        {adminImageMode === 'mobile' && currentMobileImage && (
                             <button
                                 type="button"
                                 onClick={handleRemoveMobileImage}
@@ -267,7 +273,7 @@ const HeroCarousel = ({ onShopNow }) => {
 
                 <AnimatePresence mode="wait" custom={direction}>
                     <motion.div
-                        key={slides[currentSlide].id}
+                        key={currentSlideData.id}
                         custom={direction}
                         variants={slideVariants}
                         initial="enter"
@@ -276,112 +282,158 @@ const HeroCarousel = ({ onShopNow }) => {
                         transition={{ duration: 0.35, ease: "easeInOut" }}
                         className="absolute inset-0 text-white flex flex-col justify-end sm:justify-center z-10 pointer-events-none"
                     >
-                        {/* Slide Background Image Layer */}
+                        {/* Slide Background Image Layer (Uncropped with object-contain & ambient glow) */}
                         {isAdminMode ? (
-                            <div className="absolute inset-0 z-0 pointer-events-auto">
-                                {adminImageMode === 'desktop' ? (
-                                    <EditableImage
-                                        src={slides[currentSlide].image || ''}
-                                        alt={`Hero Desktop Background ${currentSlide + 1}`}
-                                        className="w-full h-full object-cover object-center"
-                                        onSave={handleImageSave}
-                                    />
-                                ) : (
-                                    <EditableImage
-                                        src={slides[currentSlide].mobileImage || ''}
-                                        alt={`Hero Mobile Background ${currentSlide + 1}`}
-                                        className="w-full h-full object-cover object-center"
-                                        onSave={handleMobileImageSave}
-                                    />
+                            <div className="absolute inset-0 z-0 pointer-events-auto bg-black flex items-center justify-center overflow-hidden">
+                                {/* Ambient blurred background filling letterbox areas */}
+                                {((adminImageMode === 'desktop' ? currentDesktopImage : currentMobileImage) || currentDesktopImage) && (
+                                    <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                                        <CachedImage
+                                            src={adminImageMode === 'mobile' && currentMobileImage ? currentMobileImage : currentDesktopImage}
+                                            alt=""
+                                            className="w-full h-full object-cover blur-2xl scale-125 opacity-25 brightness-75"
+                                        />
+                                    </div>
                                 )}
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-black/5 sm:bg-black/40 pointer-events-none" />
-                            </div>
-                        ) : (slides[currentSlide].image || slides[currentSlide].mobileImage) ? (
-                            <div className="absolute inset-0 z-0 pointer-events-auto">
-                                {/* Desktop display (>= sm) or fallback */}
-                                <div className={`w-full h-full ${slides[currentSlide].mobileImage ? 'hidden sm:block' : 'block'}`}>
-                                    <EditableImage
-                                        src={slides[currentSlide].image || ''}
-                                        alt={`Hero Background ${currentSlide + 1}`}
-                                        className="w-full h-full object-cover object-center"
-                                        onSave={handleImageSave}
-                                    />
-                                </div>
-                                {/* Mobile display (< sm) when mobileImage is set */}
-                                {slides[currentSlide].mobileImage && (
-                                    <div className="w-full h-full block sm:hidden">
+                                <div className="relative w-full h-full flex items-center justify-center z-10">
+                                    {adminImageMode === 'desktop' ? (
                                         <EditableImage
-                                            src={slides[currentSlide].mobileImage}
+                                            src={currentDesktopImage}
+                                            alt={`Hero Desktop Background ${currentSlide + 1}`}
+                                            className="w-full h-full object-contain object-center"
+                                            containerClassName="w-full h-full flex items-center justify-center"
+                                            onSave={handleImageSave}
+                                        />
+                                    ) : (
+                                        <EditableImage
+                                            src={currentMobileImage}
                                             alt={`Hero Mobile Background ${currentSlide + 1}`}
-                                            className="w-full h-full object-cover object-center"
+                                            className="w-full h-full object-contain object-center"
+                                            containerClassName="w-full h-full flex items-center justify-center"
                                             onSave={handleMobileImageSave}
                                         />
-                                    </div>
+                                    )}
+                                </div>
+                                {hasContent && (
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent pointer-events-none z-10" />
                                 )}
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-black/5 sm:bg-black/40 pointer-events-none" />
+                            </div>
+                        ) : (currentDesktopImage || currentMobileImage) ? (
+                            <div className="absolute inset-0 z-0 pointer-events-auto bg-black flex items-center justify-center overflow-hidden">
+                                {/* Ambient blurred backdrop for letterbox areas */}
+                                <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                                    <div className={`w-full h-full ${currentMobileImage ? 'hidden sm:block' : 'block'}`}>
+                                        {currentDesktopImage && (
+                                            <CachedImage
+                                                src={currentDesktopImage}
+                                                alt=""
+                                                className="w-full h-full object-cover blur-2xl scale-125 opacity-25 brightness-75"
+                                            />
+                                        )}
+                                    </div>
+                                    {currentMobileImage && (
+                                        <div className="w-full h-full block sm:hidden">
+                                            <CachedImage
+                                                src={currentMobileImage}
+                                                alt=""
+                                                className="w-full h-full object-cover blur-2xl scale-125 opacity-25 brightness-75"
+                                            />
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Main Uncropped Graphic (object-contain ensures 100% full image visibility) */}
+                                <div className="relative w-full h-full flex items-center justify-center z-10">
+                                    <div className={`w-full h-full ${currentMobileImage ? 'hidden sm:flex' : 'flex'} items-center justify-center`}>
+                                        <CachedImage
+                                            src={currentDesktopImage}
+                                            alt={`Hero Background ${currentSlide + 1}`}
+                                            className="w-full h-full object-contain object-center"
+                                        />
+                                    </div>
+                                    {currentMobileImage && (
+                                        <div className="w-full h-full flex sm:hidden items-center justify-center">
+                                            <CachedImage
+                                                src={currentMobileImage}
+                                                alt={`Hero Mobile Background ${currentSlide + 1}`}
+                                                className="w-full h-full object-contain object-center"
+                                            />
+                                        </div>
+                                    )}
+                                </div>
+
+                                {hasContent && (
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent pointer-events-none z-10" />
+                                )}
                             </div>
                         ) : (
-                            <div className={`absolute inset-0 z-0 pointer-events-none ${slides[currentSlide].bg}`}></div>
+                            <div className={`absolute inset-0 z-0 pointer-events-none ${currentSlideData.bg}`}></div>
                         )}
 
-                        {/* Slide Text Content & Call-to-Action */}
-                        <div className="relative z-10 max-w-lg p-5 sm:p-12 pb-8 sm:pb-12 pointer-events-auto">
-                            {!isEditingText ? (
-                                <>
-                                    <motion.h2
-                                        initial={{ y: 20, opacity: 0 }}
-                                        animate={{ y: 0, opacity: 1 }}
-                                        transition={{ delay: 0.1, duration: 0.5 }}
-                                        className="text-2xl xs:text-3xl sm:text-5xl lg:text-6xl font-light mb-2.5 sm:mb-4 tracking-tighter leading-tight"
-                                        dangerouslySetInnerHTML={{ __html: slides[currentSlide].title }}
-                                    />
-                                    <motion.button
-                                        initial={{ y: 20, opacity: 0 }}
-                                        animate={{ y: 0, opacity: 1 }}
-                                        transition={{ delay: 0.2, duration: 0.5 }}
-                                        onClick={(e) => {
-                                            e.preventDefault();
-                                            onShopNow();
-                                        }}
-                                        className="bg-white text-black hover:bg-secondary hover:text-white font-medium py-2 px-6 sm:py-3 sm:px-10 rounded-full transition-all duration-300 text-xs sm:text-base shadow-lg shadow-white/20 hover:shadow-secondary/20"
-                                    >
-                                        {slides[currentSlide].buttonText}
-                                    </motion.button>
-                                </>
-                            ) : (
-                                <div className="space-y-3 pointer-events-auto bg-black/70 p-3 sm:p-4 rounded-xl backdrop-blur-md border border-white/20 max-h-[80%] overflow-y-auto">
-                                    <div>
-                                        <label className="block text-[10px] sm:text-xs text-white/70 mb-1 uppercase tracking-wider">Slide Title (Rich Text)</label>
-                                        <RichTextEditor
-                                            value={editTitle}
-                                            onChange={(val) => setEditTitle(val)}
-                                            className="text-xl sm:text-4xl font-light tracking-tighter"
-                                        />
+                        {/* Slide Text Content & Call-to-Action (rendered only if text exists) */}
+                        {hasContent && (
+                            <div className="relative z-20 max-w-lg p-4 sm:p-12 pb-7 sm:pb-12 pointer-events-auto">
+                                {!isEditingText ? (
+                                    <>
+                                        {currentSlideData.title && (
+                                            <motion.h2
+                                                initial={{ y: 20, opacity: 0 }}
+                                                animate={{ y: 0, opacity: 1 }}
+                                                transition={{ delay: 0.1, duration: 0.5 }}
+                                                className="text-xl sm:text-5xl lg:text-6xl font-light mb-2 sm:mb-4 tracking-tighter leading-tight drop-shadow-md"
+                                                dangerouslySetInnerHTML={{ __html: currentSlideData.title }}
+                                            />
+                                        )}
+                                        {currentSlideData.buttonText && (
+                                            <motion.button
+                                                initial={{ y: 20, opacity: 0 }}
+                                                animate={{ y: 0, opacity: 1 }}
+                                                transition={{ delay: 0.2, duration: 0.5 }}
+                                                onClick={(e) => {
+                                                    e.preventDefault();
+                                                    onShopNow();
+                                                }}
+                                                className="bg-white text-black hover:bg-secondary hover:text-white font-medium py-1.5 px-5 sm:py-3 sm:px-10 rounded-full transition-all duration-300 text-xs sm:text-base shadow-lg shadow-white/20 hover:shadow-secondary/20"
+                                            >
+                                                {currentSlideData.buttonText}
+                                            </motion.button>
+                                        )}
+                                    </>
+                                ) : (
+                                    <div className="space-y-3 pointer-events-auto bg-black/80 p-3 sm:p-4 rounded-xl backdrop-blur-md border border-white/20 max-h-[80%] overflow-y-auto">
+                                        <div>
+                                            <label className="block text-[10px] sm:text-xs text-white/70 mb-1 uppercase tracking-wider">Slide Title (Rich Text)</label>
+                                            <RichTextEditor
+                                                value={editTitle}
+                                                onChange={(val) => setEditTitle(val)}
+                                                className="text-xl sm:text-4xl font-light tracking-tighter"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-[10px] sm:text-xs text-white/70 mb-1 uppercase tracking-wider">Button Text</label>
+                                            <input
+                                                type="text"
+                                                value={editButtonText}
+                                                onChange={(e) => setEditButtonText(e.target.value)}
+                                                className="w-full bg-white/10 border border-white/20 rounded px-3 py-1.5 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-secondary"
+                                            />
+                                        </div>
                                     </div>
-                                    <div>
-                                        <label className="block text-[10px] sm:text-xs text-white/70 mb-1 uppercase tracking-wider">Button Text</label>
-                                        <input
-                                            type="text"
-                                            value={editButtonText}
-                                            onChange={(e) => setEditButtonText(e.target.value)}
-                                            className="w-full bg-white/10 border border-white/20 rounded px-3 py-1.5 text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-secondary"
-                                        />
-                                    </div>
-                                </div>
-                            )}
-                        </div>
+                                )}
+                            </div>
+                        )}
 
                         {/* Background Glows (Hidden on smaller screens to save mobile GPU) */}
                         <div className="absolute right-0 top-0 h-full w-1/2 opacity-20 pointer-events-none hidden sm:block">
-                            <div className={`absolute top-1/2 left-1/2 w-96 h-96 ${slides[currentSlide].glow1} rounded-full blur-[100px] -translate-x-1/2 -translate-y-1/2 animate-pulse-slow`}></div>
-                            <div className={`absolute top-0 right-0 w-80 h-80 ${slides[currentSlide].glow2} rounded-full blur-[80px]`}></div>
+                            <div className={`absolute top-1/2 left-1/2 w-96 h-96 ${currentSlideData.glow1} rounded-full blur-[100px] -translate-x-1/2 -translate-y-1/2 animate-pulse-slow`}></div>
+                            <div className={`absolute top-0 right-0 w-80 h-80 ${currentSlideData.glow2} rounded-full blur-[80px]`}></div>
                         </div>
                     </motion.div>
                 </AnimatePresence>
 
                 {/* Carousel Indicators (Touch-friendly Hit Areas) */}
                 {slides.length > 1 && (
-                    <div className="absolute bottom-3 sm:bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-1.5 sm:gap-2 z-20 pointer-events-auto">
+                    <div className="absolute bottom-2.5 sm:bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-1.5 sm:gap-2 z-20 pointer-events-auto">
                         {slides.map((_, index) => (
                             <button
                                 key={index}
