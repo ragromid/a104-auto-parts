@@ -1,7 +1,9 @@
-import React, { memo } from 'react';
+import React, { memo, useState } from 'react';
 import StarIcon from '@mui/icons-material/Star';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
+import ShareIcon from '@mui/icons-material/Share';
+import CheckIcon from '@mui/icons-material/Check';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
@@ -16,6 +18,44 @@ const ProductCard = memo(({ product, onSelect }) => {
 
     // Check if item is already in cart
     const isAdded = cartItems.some(item => item.id === product.id);
+
+    const [copied, setCopied] = useState(false);
+
+    const handleShare = async (e) => {
+        e.stopPropagation();
+        const shareUrl = `${window.location.origin}/?product=${encodeURIComponent(product.id)}`;
+        const shareData = {
+            title: product.name || 'Product',
+            text: `Check out ${product.name} on KNK Avto`,
+            url: shareUrl
+        };
+
+        if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
+            try {
+                await navigator.share(shareData);
+                return;
+            } catch (err) {
+                if (err.name === 'AbortError') return;
+            }
+        }
+
+        try {
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                await navigator.clipboard.writeText(shareUrl);
+            } else {
+                const input = document.createElement('input');
+                input.value = shareUrl;
+                document.body.appendChild(input);
+                input.select();
+                document.execCommand('copy');
+                document.body.removeChild(input);
+            }
+            setCopied(true);
+            setTimeout(() => setCopied(false), 2000);
+        } catch (err) {
+            console.error('Failed to copy share link:', err);
+        }
+    };
 
     const handleDelete = (e) => {
         e.stopPropagation();
@@ -45,12 +85,28 @@ const ProductCard = memo(({ product, onSelect }) => {
             </div>
 
             {isAdminMode && (
-                <button
-                    onClick={handleDelete}
-                    className="absolute top-2 right-2 z-30 bg-red-500 text-white w-8 h-8 flex items-center justify-center rounded-full shadow-md hover:bg-red-600 transition-colors"
-                >
-                    <DeleteIcon style={{ fontSize: 16 }} />
-                </button>
+                <div className="absolute top-2 right-2 z-30 flex items-center gap-1.5">
+                    <button
+                        type="button"
+                        onClick={handleShare}
+                        className={`w-8 h-8 flex items-center justify-center rounded-full shadow-md transition-all duration-200 ${
+                            copied
+                                ? 'bg-green-500 text-white scale-110'
+                                : 'bg-blue-600 hover:bg-blue-700 text-white'
+                        }`}
+                        title={copied ? "Link Copied!" : "Share Product Link"}
+                    >
+                        {copied ? <CheckIcon style={{ fontSize: 16 }} /> : <ShareIcon style={{ fontSize: 16 }} />}
+                    </button>
+                    <button
+                        type="button"
+                        onClick={handleDelete}
+                        className="bg-red-500 text-white w-8 h-8 flex items-center justify-center rounded-full shadow-md hover:bg-red-600 transition-colors"
+                        title="Delete Product"
+                    >
+                        <DeleteIcon style={{ fontSize: 16 }} />
+                    </button>
+                </div>
             )}
 
             {/* Product Image */}

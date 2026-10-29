@@ -1,6 +1,8 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import CloseIcon from '@mui/icons-material/Close';
+import ShareIcon from '@mui/icons-material/Share';
+import CheckIcon from '@mui/icons-material/Check';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 import { useContent } from '../context/ContentContext';
@@ -23,6 +25,43 @@ const ExpandedProductCard = ({ product, onClose, layoutId }) => {
         return product.image ? [product.image] : [];
     });
     const [currentIndex, setCurrentIndex] = React.useState(0);
+    const [copied, setCopied] = React.useState(false);
+
+    const handleShare = async (e) => {
+        e?.stopPropagation();
+        const shareUrl = `${window.location.origin}/?product=${encodeURIComponent(product.id)}`;
+        const shareData = {
+            title: product.name || 'Product',
+            text: `Check out ${product.name} on KNK Avto`,
+            url: shareUrl
+        };
+
+        if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
+            try {
+                await navigator.share(shareData);
+                return;
+            } catch (err) {
+                if (err.name === 'AbortError') return;
+            }
+        }
+
+        try {
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                await navigator.clipboard.writeText(shareUrl);
+            } else {
+                const input = document.createElement('input');
+                input.value = shareUrl;
+                document.body.appendChild(input);
+                input.select();
+                document.execCommand('copy');
+                document.body.removeChild(input);
+            }
+            setCopied(true);
+            setTimeout(() => setCopied(false), 2000);
+        } catch (err) {
+            console.error('Failed to copy share link:', err);
+        }
+    };
 
     // Sync changes to centralized state
     const handleImageUpdate = (newImageSrc) => {
@@ -155,10 +194,24 @@ const ExpandedProductCard = ({ product, onClose, layoutId }) => {
                         </>
                     )}
 
-                    {/* Admin Controls for Carousel */}
+                    {/* Admin Controls for Carousel & Share */}
                     {isAdminMode && (
-                        <div className="absolute top-4 right-16 z-20 flex gap-2">
+                        <div className="absolute top-4 right-16 z-20 flex items-center gap-2">
                             <button
+                                type="button"
+                                onClick={handleShare}
+                                className={`text-xs px-3 py-1.5 rounded-full backdrop-blur-sm transition-all flex items-center gap-1.5 shadow-sm ${
+                                    copied
+                                        ? 'bg-green-500 text-white scale-105'
+                                        : 'bg-blue-600/90 hover:bg-blue-600 text-white'
+                                }`}
+                                title="Share Product Link"
+                            >
+                                {copied ? <CheckIcon sx={{ fontSize: 15 }} /> : <ShareIcon sx={{ fontSize: 15 }} />}
+                                <span className="font-medium">{copied ? 'Copied Link!' : 'Share'}</span>
+                            </button>
+                            <button
+                                type="button"
                                 onClick={handleAddImage}
                                 className="bg-green-500/80 hover:bg-green-600 text-white text-xs px-3 py-1.5 rounded-full backdrop-blur-sm transition-colors"
                             >
@@ -166,6 +219,7 @@ const ExpandedProductCard = ({ product, onClose, layoutId }) => {
                             </button>
                             {images.length > 1 && (
                                 <button
+                                    type="button"
                                     onClick={handleRemoveImage}
                                     className="bg-red-500/80 hover:bg-red-600 text-white text-xs px-3 py-1.5 rounded-full backdrop-blur-sm transition-colors"
                                 >
